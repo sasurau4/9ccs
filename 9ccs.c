@@ -107,9 +107,19 @@ Token *tokenize(char *p) {
             continue;
         }
 
-        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')') {
-            cur = new_token(TK_RESERVED, cur, p++);
-            continue;
+        switch (*p) {
+            case '+': 
+            case '-': 
+            case '*': 
+            case '/': 
+            case '(': 
+            case ')': {
+                cur = new_token(TK_RESERVED, cur, p++);
+                continue;
+            }
+            default: {
+                // Do nothing
+            }
         }
 
         if (isdigit(*p)) {
