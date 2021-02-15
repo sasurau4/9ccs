@@ -107,7 +107,7 @@ Token *tokenize(char *p) {
             continue;
         }
 
-        if (*p == '+' || *p == '-') {
+        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')') {
             cur = new_token(TK_RESERVED, cur, p++);
             continue;
         }
@@ -127,6 +127,16 @@ Token *tokenize(char *p) {
 
 /**
  * Parser
+ * */
+/**
+ * function prototype
+ * */
+Node *primary();
+Node *mul();
+Node *expr();
+
+/**
+ * function implementation
  * */
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
     Node *node = calloc(1, sizeof(Node));
@@ -150,7 +160,7 @@ Node *primary() {
         return node;
     }
 
-    return nde_node_num(expect_number());
+    return new_node_num(expect_number());
 }
 
 Node *mul() {
@@ -223,24 +233,16 @@ int main(int argc, char **argv) {
     }
 
     user_input = argv[1];
-    token = tokenize(argv[1]);
+    token = tokenize(user_input);
+    Node *node = expr();
 
     printf(".intel_syntax noprefix\n");
     printf(".globl main\n");
     printf("main: \n");
 
-    printf("    mov rax, %d\n", expect_number());
+    gen(node);
 
-    while (!at_eof()) {
-        if (consume('+')) {
-            printf("    add rax, %d\n", expect_number());
-            continue;
-        }
-
-        expect('-');
-        printf("    sub rax, %d\n", expect_number());
-    }
-
+    printf("    pop rax\n");
     printf("    ret\n");
     return 0;
 }

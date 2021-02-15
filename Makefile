@@ -6,6 +6,6 @@ test: 9ccs
 		./test.sh
 
 clean:
-		rm -f 9cc *.o *~ tmp*
+		rm -f 9ccs *.o *~ tmp*
 
 .PHONEY: test clean
