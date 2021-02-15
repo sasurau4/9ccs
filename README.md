@@ -15,5 +15,5 @@ gdb a.out
 ```
 
 ref: 478b796bc2854ce3d1e6737d2bdd7e18943254c3
-remove tokenize function call and compile
+remove tokenize function call and compile, then run result `SIGSEGV` with Address boundary error!
 https://qiita.com/arene-calix/items/a08363db88f21c81d351
