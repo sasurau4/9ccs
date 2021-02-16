@@ -42,3 +42,17 @@ y= x+=1
 ->
 x=1, y=1
 ```
+
+#### gcc withc -Wl option
+
+Incorrect
+```
+gcc --static -Wl, -N -o test test.o
+/usr/bin/ld: cannot find : No such file or directory
+collect2: error: ld returned 1 exit status
+```
+
+correct
+```
+gcc --static -Wl,-N -o test test.o
+```
