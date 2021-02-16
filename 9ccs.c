@@ -26,6 +26,10 @@ typedef enum {
     ND_SUB,
     ND_MUL,
     ND_DIV,
+    ND_EQ,
+    ND_NOT_EQ,
+    ND_LT,
+    ND_LE,
     ND_NUM,
 } NodeKind;
 
@@ -93,6 +97,12 @@ bool at_eof() {
     return token->kind == TK_EOF;
 }
 
+bool starts_with(const char *pre, const char *str) {
+    size_t lenpre = strlen(pre),
+           lenstr = strlen(str);
+    return lenstr < lenpre ? false : memcmp(pre, str, lenpre) == 0;
+}
+
 Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
     Token *tok = calloc(1, sizeof(Token));
     tok->kind = kind;
@@ -113,13 +123,24 @@ Token *tokenize(char *p) {
             continue;
         }
 
+        if (starts_with("==", p) || 
+            starts_with("!=", p) || 
+            starts_with(">=", p) ||
+            starts_with("<=", p)) {
+            cur = new_token(TK_RESERVED, cur, p, 2);
+            p = p+2;
+            continue;
+        }
+
         switch (*p) {
             case '+': 
             case '-': 
             case '*': 
             case '/': 
             case '(': 
-            case ')': {
+            case ')': 
+            case '<': 
+            case '>': {
                 cur = new_token(TK_RESERVED, cur, p++, 1);
                 continue;
             }
@@ -129,9 +150,8 @@ Token *tokenize(char *p) {
         }
 
         if (isdigit(*p)) {
-            // FIXME: 0 is magic number
             cur = new_token(TK_NUM, cur, p, 0);
-            cur-> val = strtol(p, &p, 10);
+            cur->val = strtol(p, &p, 10);
             continue;
         }
 
@@ -148,10 +168,13 @@ Token *tokenize(char *p) {
 /**
  * function prototype
  * */
-Node *primary();
+Node *expr();
+Node *equality();
+Node *relational();
+Node *add();
 Node *mul();
 Node *unary();
-Node *expr();
+Node *primary();
 
 /**
  * function implementation
@@ -206,7 +229,7 @@ Node *unary() {
 
 }
 
-Node *expr() {
+Node *add() {
     Node *node = mul();
 
     for (;;) {
@@ -218,6 +241,43 @@ Node *expr() {
             return node;
         }
     }
+}
+
+Node *relational() {
+    Node *node = add();
+
+    for (;;) {
+        if (consume("<")) {
+            node = new_node(ND_LT, node, add());
+        } else if (consume(">")) {
+            node = new_node(ND_LT, add(), node);
+        } else if (consume("<=")) {
+            node = new_node(ND_LE, node, add());
+        } else if (consume(">=")) {
+            node = new_node(ND_LE, add(), node);
+        } else {
+            return node;
+        }
+    }
+}
+
+Node *equality() {
+    Node *node = relational();
+
+    for (;;) {
+        if (consume("==")) {
+            node = new_node(ND_EQ, node, relational());
+        } else if (consume("!=")) {
+            node = new_node(ND_NOT_EQ, node, relational());
+        } else {
+            return node;
+        }
+    }
+}
+
+Node *expr() {
+    Node *node = equality();
+    return node;
 }
 
 void gen(Node *node) {
@@ -248,6 +308,30 @@ void gen(Node *node) {
         case ND_DIV: {
             printf("    cqo\n");
             printf("    idiv rdi\n");
+            break;
+        }
+        case ND_EQ: {
+            printf("    cmp rax, rdi\n");
+            printf("    sete al\n");
+            printf("    movzb rax, al\n");
+            break;
+        }
+        case ND_NOT_EQ: {
+            printf("    cmp rax, rdi\n");
+            printf("    setne al\n");
+            printf("    movzb rax, al\n");
+            break;
+        }
+        case ND_LT: {
+            printf("    cmp rax, rdi\n");
+            printf("    setl al\n");
+            printf("    movzb rax, al\n");
+            break;
+        }
+        case ND_LE: {
+            printf("    cmp rax, rdi\n");
+            printf("    setle al\n");
+            printf("    movzb rax, al\n");
             break;
         }
     }
