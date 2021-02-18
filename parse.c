@@ -1,4 +1,3 @@
-
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -31,6 +30,15 @@ bool consume(char *op) {
     }
     token = token->next;
     return true;
+}
+
+Token *consume_ident() {
+    if (token->kind != TK_IDENT) {
+        return 0;
+    }
+    Token *ident_token = token;
+    token = token->next;
+    return ident_token;
 }
 
 void expect(char *op) {
@@ -99,13 +107,20 @@ Token *tokenize(char *p) {
             case '(': 
             case ')': 
             case '<': 
-            case '>': {
+            case '>': 
+            case '=': 
+            case ';': {
                 cur = new_token(TK_RESERVED, cur, p++, 1);
                 continue;
             }
             default: {
                 // Do nothing
             }
+        }
+
+        if ('a' <= *p && *p <= 'z') {
+            cur = new_token(TK_IDENT, cur, p++, 1);
+            continue;
         }
 
         if (isdigit(*p)) {
@@ -147,6 +162,14 @@ Node *primary() {
     if (consume("(")) {
         Node *node = expr();
         expect(")");
+        return node;
+    }
+
+    Token *tok = consume_ident();
+    if (tok) {
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_LVAR;
+        node->offset = (tok->str[0] - 'a' + 1) * 8;
         return node;
     }
 
@@ -224,7 +247,29 @@ Node *equality() {
     }
 }
 
-Node *expr() {
+Node *assign() {
     Node *node = equality();
+
+    if(consume("=")) {
+        node = new_node(ND_ASSIGN, node, assign());
+    }
     return node;
+}
+
+Node *expr() {
+    return assign();
+}
+
+Node *stmt() {
+    Node *node = expr();
+    expect(";");
+    return node;
+}
+
+void program() {
+    int i = 0;
+    while (!at_eof()) {
+        code[i++] = stmt();
+    }
+    code[i] = NULL;
 }

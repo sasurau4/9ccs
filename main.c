@@ -7,6 +7,7 @@
  * */
 char *user_input;
 Token *token;
+Node *code[100];
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -16,15 +17,30 @@ int main(int argc, char **argv) {
 
     user_input = argv[1];
     token = tokenize(user_input);
-    Node *node = expr();
+    program();
 
     printf(".intel_syntax noprefix\n");
     printf(".globl main\n");
     printf("main: \n");
 
-    gen(node);
+    // Prologue
+    // Acquire space for 26 variables
+    printf("    push rbp\n");
+    printf("    mov rbp, rsp\n");
+    printf("    sub rsp, 208\n");
 
-    printf("    pop rax\n");
+    for (int i = 0; code[i]; i++) {
+        gen(code[i]);
+
+        // A value left as the result of statement at stack
+        // So pop it to prevent overflow the stack
+        printf(" pop rax\n");
+    }
+
+    // Epilogue
+    // The result of last statement left on RAX, we return it
+    printf("    mov rsp, rbp\n");
+    printf("    pop rbp\n");
     printf("    ret\n");
     return 0;
 }
