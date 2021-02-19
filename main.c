@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 
         // A value left as the result of statement at stack
         // So pop it to prevent overflow the stack
-        printf(" pop rax\n");
+        printf("    pop rax\n");
     }
 
     // Epilogue
