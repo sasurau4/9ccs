@@ -93,3 +93,15 @@ int main(int argc, char **argv) {
     ...
 }
 ```
+
+## Implement return stmt
+
+Encounter this crash.
+
+```
+./test.sh
+return 2;
+ ^ Not a number
+```
+
+This is caused by `consume` function take into consideration only for `TK_RESERVED`. Adding for `TK_RETURN` fix this issue.
