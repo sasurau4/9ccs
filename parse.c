@@ -70,6 +70,10 @@ bool starts_with(const char *pre, const char *str) {
     return lenstr < lenpre ? false : memcmp(pre, str, lenpre) == 0;
 }
 
+bool is_alphabet(char *p) {
+    return 'a' <= *p && *p <= 'z';
+}
+
 Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
     Token *tok = calloc(1, sizeof(Token));
     tok->kind = kind;
@@ -77,6 +81,15 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
     tok->len = len;
     cur->next = tok;
     return tok;
+}
+
+LVar *find_lvar(Token *tok) {
+    for (LVar *var = locals; var; var = var->next) {
+        if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)) {
+            return var;
+        }
+    }
+    return NULL;
 }
 
 Token *tokenize(char *p) {
@@ -118,8 +131,14 @@ Token *tokenize(char *p) {
             }
         }
 
-        if ('a' <= *p && *p <= 'z') {
-            cur = new_token(TK_IDENT, cur, p++, 1);
+        if (is_alphabet(p)) {
+            int i = 1;
+            while(is_alphabet(p + i)) {
+                i += 1;
+                continue;
+            }
+            cur = new_token(TK_IDENT, cur, p, i);
+            p += i;
             continue;
         }
 
@@ -169,7 +188,19 @@ Node *primary() {
     if (tok) {
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
-        node->offset = (tok->str[0] - 'a' + 1) * 8;
+
+        LVar *lvar = find_lvar(tok);
+        if (lvar) {
+            node->offset = lvar->offset;
+        } else {
+            lvar = calloc(1, sizeof(LVar));
+            lvar->next = locals ? locals : NULL;
+            lvar->name = tok->str;
+            lvar->len = tok->len;
+            lvar->offset = locals ? locals->offset + 8 : 8;
+            node->offset = lvar->offset;
+            locals = lvar;
+        }
         return node;
     }
 

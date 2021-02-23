@@ -40,6 +40,15 @@ struct Node {
     int offset; // If kind is ND_LVAR, this hold offset from RBP
 };
 
+typedef struct LVar LVar;
+
+struct LVar {
+    LVar *next; // Next var or NULL
+    char *name; // The name of var
+    int len; // The length of var name
+    int offset; // Offset from RBP
+};
+
 /**
  * parser
  * */
@@ -66,3 +75,4 @@ void gen(Node *node);
 extern Token *token;
 extern char *user_input;
 extern Node *code[100];
+extern LVar *locals;

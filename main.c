@@ -8,6 +8,19 @@
 char *user_input;
 Token *token;
 Node *code[100];
+LVar *locals;
+
+int count_locals_space() {
+    int i = 0;
+    if (!locals) {
+        return i;
+    }
+    for (LVar *var = locals; var; var = var->next) {
+        i += 1;
+    }
+    // A variable space is fixed of 8
+    return i * 8;
+}
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -24,10 +37,10 @@ int main(int argc, char **argv) {
     printf("main: \n");
 
     // Prologue
-    // Acquire space for 26 variables
+    // Acquire space for variables
     printf("    push rbp\n");
     printf("    mov rbp, rsp\n");
-    printf("    sub rsp, 208\n");
+    printf("    sub rsp, %d\n", count_locals_space());
 
     for (int i = 0; code[i]; i++) {
         gen(code[i]);
