@@ -55,5 +55,6 @@ return 1;"
 assert 6 "foo = 1;
 bar = 2 + 3;
 return foo + bar;"
+assert 2 'if (1) 2;'
 
 echo OK

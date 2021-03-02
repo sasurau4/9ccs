@@ -2,6 +2,7 @@
 typedef enum {
     TK_RESERVED,
     TK_RETURN,
+    TK_IF,
     TK_IDENT,
     TK_NUM,
     TK_EOF,
@@ -30,6 +31,7 @@ typedef enum {
     ND_ASSIGN,
     ND_LVAR,
     ND_RETURN,
+    ND_IF,
 } NodeKind;
 
 typedef struct Node Node;
@@ -38,6 +40,9 @@ struct Node {
     NodeKind kind;
     Node *lhs;
     Node *rhs;
+    // "if" (cond) then
+    Node *cond; 
+    Node *then; 
     int val; // If kind is ND_NUM, this hold value
     int offset; // If kind is ND_LVAR, this hold offset from RBP
 };

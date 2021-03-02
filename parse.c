@@ -23,8 +23,18 @@ void error_at(char *loc, char *fmt, ...) {
  * Tokenizer
  * */
 bool consume(char *op) {
-    if (!(token->kind == TK_RESERVED || token->kind == TK_RETURN) || 
-        strlen(op) != token->len || 
+    switch (token->kind) {
+        case TK_IDENT:
+        case TK_NUM:
+        case TK_EOF: {
+            return false;
+        }
+        default: {
+            // Do nothing
+        }
+    }
+
+    if (strlen(op) != token->len || 
         memcmp(token->str, op, token->len)) {
         return false;
     }
@@ -75,6 +85,11 @@ bool is_alnum(char c) {
             ('A' <= c && c <= 'Z') || 
             ('0' <= c && c <= '9') || 
             (c == '_');
+}
+
+bool is_reserved_keyword(const char *str, const char *keyword) {
+    size_t lenkw = strlen(keyword);
+    return strncmp(str, keyword, lenkw) == 0 && !is_alnum(str[lenkw]);
 }
 
 Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
@@ -134,9 +149,15 @@ Token *tokenize(char *p) {
             }
         }
 
-        if (strncmp(p, "return", 6) == 0 && !is_alnum(p[6])) {
+        if (is_reserved_keyword(p, "return")) {
             cur = new_token(TK_RETURN, cur, p, 6);
             p += 6;
+            continue;
+        }
+
+        if (is_reserved_keyword(p, "if")) {
+            cur = new_token(TK_IF, cur, p, 2);
+            p += 2;
             continue;
         }
 
@@ -308,12 +329,19 @@ Node *stmt() {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();
+        expect(";");
+    } else if (consume("if")) {
+        expect("(");
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_IF;
+        node->cond = expr();
+        expect(")");
+        node->then = stmt();
     } else {
         node = expr();
+        expect(";");
     }
-    if (!consume(";")) {
-        error_at(token->str, "expect ';'");
-    }
+
     return node;
 }
 

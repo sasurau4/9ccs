@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include "9ccs.h"
 
+// Use for label name for control flow
+int control_flow_count = 0;
+
 void error(char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
@@ -23,6 +26,9 @@ void gen_lval(Node *node) {
 
 }
 void gen(Node *node) {
+
+
+    // For one line stmts
     switch (node->kind) {
         case ND_NUM: {
             printf("    push %d\n", node->val);
@@ -53,10 +59,27 @@ void gen(Node *node) {
             printf("    ret\n");
             return;
         }
+        case ND_IF: {
+            gen(node->cond);
+            printf("    pop rax\n");
+            printf("    cmp rax, 0\n");
+            printf("    je  .Lend%03d\n", control_flow_count);
+            gen(node->then);
+            printf("    pop rax\n");
+            printf("    mov rsp, rbp\n");
+            printf("    pop rbp\n");
+            printf("    ret\n");
+            printf(".Lend%03d:\n", control_flow_count);
+            control_flow_count += 1;
+        }
     }
 
-    gen(node->lhs);
-    gen(node->rhs);
+    if (node->lhs) {
+        gen(node->lhs);
+    }
+    if (node->rhs) {
+        gen(node->rhs);
+    }
 
     printf("    pop rdi\n");
     printf("    pop rax\n");
