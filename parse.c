@@ -24,7 +24,8 @@ void error_at(char *loc, char *fmt, ...) {
  * */
 char *KW_RETURN = "return";
 char *KW_IF = "if";
-char * KW_ELSE = "else";
+char *KW_ELSE = "else";
+char *KW_WHILE = "while"; 
 
 /**
  * Tokenizer
@@ -172,6 +173,13 @@ Token *tokenize(char *p) {
 
         if (is_reserved_keyword(p, KW_ELSE)) {
             int keylen = strlen(KW_ELSE);
+            cur = new_token(TK_ELSE, cur, p, keylen);
+            p += keylen;
+            continue;
+        }
+
+        if (is_reserved_keyword(p, KW_WHILE)) {
+            int keylen = strlen(KW_WHILE);
             cur = new_token(TK_ELSE, cur, p, keylen);
             p += keylen;
             continue;
@@ -356,6 +364,13 @@ Node *stmt() {
         if (consume(KW_ELSE)) {
             node->els = stmt();
         }
+    } else if (consume(KW_WHILE)) {
+        expect("(");
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_WHILE;
+        node->cond = expr();
+        expect(")");
+        node->body = stmt();
     } else {
         node = expr();
         expect(";");

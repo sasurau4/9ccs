@@ -72,6 +72,18 @@ void gen(Node *node) {
             control_flow_count += 1;
             return;
         }
+        case ND_WHILE: {
+            printf(".Lbegin%03d:\n", control_flow_count);
+            gen(node->cond);
+            printf("    pop rax\n");
+            printf("    cmp rax, 0\n");
+            printf("    je  .Lend%03d\n", control_flow_count);
+            gen(node->body);
+            printf("jmp .Lbegin%03d\n", control_flow_count);
+            printf(".Lend%03d:\n", control_flow_count);
+            control_flow_count += 1;
+            return;
+        }
     }
 
     gen(node->lhs);

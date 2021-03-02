@@ -46,6 +46,8 @@ a;
 assert 14 "a = 3;
 b = 5 * 6 - 8;
 a + b / 2;"
+assert 2 "a = 1;
+a = a + 1;"
 assert 6 "foo = 1;
 bar = 2 + 3;
 foo + bar;"
@@ -60,5 +62,7 @@ assert 10 'if (0) 2; else 10;'
 assert 2 "a = 1;
 b = 1;
 if (a - b) a - b; else a + b;"
+assert 4 "a = 1;
+while (a < 4) a = a + 1;"
 
 echo OK
