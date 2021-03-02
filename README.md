@@ -105,3 +105,32 @@ return 2;
 ```
 
 This is caused by `consume` function take into consideration only for `TK_RESERVED`. Adding for `TK_RETURN` fix this issue.
+
+## Implement if and else stmt
+
+Following is work fine and return 2
+
+```assembly
+.intel_syntax noprefix
+.globl main
+main: 
+    push 2
+    push 3
+    pop rax
+    pop rax
+    ret
+```
+
+SIGSEGV with address boundary error
+
+```assembly
+.intel_syntax noprefix
+.globl main
+main: 
+    push 2
+    push 3
+    pop rax
+    ret
+```
+
+We need to clear arranged registers (or stacks?)
