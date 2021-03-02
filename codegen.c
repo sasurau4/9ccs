@@ -4,7 +4,7 @@
 #include "9ccs.h"
 
 // Use for label name for control flow
-int control_flow_count = 0;
+int total_control_flow_count = 0;
 
 void error(char *fmt, ...) {
     va_list ap;
@@ -58,31 +58,55 @@ void gen(Node *node) {
             return;
         }
         case ND_IF: {
+            int cfcount = total_control_flow_count;
+            total_control_flow_count += 1;
             gen(node->cond);
             printf("    pop rax\n");
             printf("    cmp rax, 0\n");
-            printf("    je  .Lelse%03d\n", control_flow_count);
+            printf("    je  .Lelse%03d\n", cfcount);
             gen(node->then);
-            printf("    jmp .Lend%03d\n", control_flow_count);
-            printf(".Lelse%03d:\n", control_flow_count);
+            printf("    jmp .Lend%03d\n", cfcount);
+            printf(".Lelse%03d:\n", cfcount);
             if (node->els) {
                 gen(node->els);
             }
-            printf(".Lend%03d:\n", control_flow_count);
-            control_flow_count += 1;
+            printf(".Lend%03d:\n", cfcount);
             return;
         }
         case ND_WHILE: {
-            printf(".Lbegin%03d:\n", control_flow_count);
+            int cfcount = total_control_flow_count;
+            total_control_flow_count += 1;
+            printf(".Lbegin%03d:\n", cfcount);
             gen(node->cond);
             printf("    pop rax\n");
             printf("    cmp rax, 0\n");
-            printf("    je  .Lend%03d\n", control_flow_count);
+            printf("    je  .Lend%03d\n", cfcount);
             gen(node->body);
-            printf("jmp .Lbegin%03d\n", control_flow_count);
-            printf(".Lend%03d:\n", control_flow_count);
-            control_flow_count += 1;
+            printf("    jmp .Lbegin%03d\n", cfcount);
+            printf(".Lend%03d:\n", cfcount);
             return;
+        }
+        case ND_FOR: {
+            int cfcount = total_control_flow_count;
+            total_control_flow_count += 1;
+            if (node->init) {
+                gen(node->init);
+            }
+            printf(".Lbegin%03d:\n", cfcount);
+            if (node->cond) {
+                gen(node->cond);
+            }
+            printf("    pop rax\n");
+            printf("    cmp rax, 0\n");
+            printf("    je  .Lend%03d\n", cfcount);
+            gen(node->body);
+            if (node->inc) {
+                gen(node->inc);
+            }
+            printf("    jmp .Lbegin%03d\n", cfcount);
+            printf(".Lend%03d:\n", cfcount);
+            return;
+
         }
     }
 

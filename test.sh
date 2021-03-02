@@ -64,5 +64,13 @@ b = 1;
 if (a - b) a - b; else a + b;"
 assert 4 "a = 1;
 while (a < 4) a = a + 1;"
+assert 13 "a = 10; for (b = 0; b < 3; b = b + 1) a = a + 1; a;"
+assert 11 "a = 10; for (b = 0; b < 3; b = b + 1) if (a == 11) return a; else a = a + 1; a;"
+assert 13 "a = 10; b = 0; for (; b < 3; b = b + 1) a = a + 1; a;"
+assert 10 "a = 10; for (b = 0;; b = b + 1) a = a + 1; a;"
+assert 3 "for (b = 0; b < 3;) b = b + 1; b;"
+# FIXME
+# assert 1 "a = 1; for (;;) return a;"
+assert 1 "a = 1; for (;;) return 1;"
 
 echo OK

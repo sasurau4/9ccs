@@ -5,6 +5,7 @@ typedef enum {
     TK_IF,
     TK_ELSE,
     TK_WHILE,
+    TK_FOR,
     TK_IDENT,
     TK_NUM,
     TK_EOF,
@@ -35,6 +36,7 @@ typedef enum {
     ND_RETURN,
     ND_IF,
     ND_WHILE,
+    ND_FOR,
 } NodeKind;
 
 typedef struct Node Node;
@@ -45,10 +47,13 @@ struct Node {
     Node *rhs;
     // "if" (cond) then "else" els
     // "while" (cond) body
+    // "for" (init; cond; inc) body
     Node *cond; 
     Node *then; 
     Node *els;
     Node *body;
+    Node *init;
+    Node *inc;
     int val; // If kind is ND_NUM, this hold value
     int offset; // If kind is ND_LVAR, this hold offset from RBP
 };

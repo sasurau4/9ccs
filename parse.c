@@ -26,6 +26,7 @@ char *KW_RETURN = "return";
 char *KW_IF = "if";
 char *KW_ELSE = "else";
 char *KW_WHILE = "while"; 
+char *KW_FOR = "for";
 
 /**
  * Tokenizer
@@ -181,6 +182,13 @@ Token *tokenize(char *p) {
         if (is_reserved_keyword(p, KW_WHILE)) {
             int keylen = strlen(KW_WHILE);
             cur = new_token(TK_ELSE, cur, p, keylen);
+            p += keylen;
+            continue;
+        }
+
+        if (is_reserved_keyword(p, KW_FOR)) {
+            int keylen = strlen(KW_FOR);
+            cur = new_token(TK_FOR, cur, p, keylen);
             p += keylen;
             continue;
         }
@@ -370,6 +378,23 @@ Node *stmt() {
         node->kind = ND_WHILE;
         node->cond = expr();
         expect(")");
+        node->body = stmt();
+    } else if (consume(KW_FOR)) {
+        expect("(");
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_FOR;
+        if (!consume(";")) {
+            node->init = expr();
+            expect(";");
+        }
+        if (!consume(";")) {
+            node->cond = expr();
+            expect(";");
+        }
+        if (!consume(")")) {
+            node->inc = expr();
+            expect(")");
+        }
         node->body = stmt();
     } else {
         node = expr();
