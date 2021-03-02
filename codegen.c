@@ -26,8 +26,6 @@ void gen_lval(Node *node) {
 
 }
 void gen(Node *node) {
-
-
     // For one line stmts
     switch (node->kind) {
         case ND_NUM: {
@@ -63,23 +61,21 @@ void gen(Node *node) {
             gen(node->cond);
             printf("    pop rax\n");
             printf("    cmp rax, 0\n");
-            printf("    je  .Lend%03d\n", control_flow_count);
+            printf("    je  .Lelse%03d\n", control_flow_count);
             gen(node->then);
-            printf("    pop rax\n");
-            printf("    mov rsp, rbp\n");
-            printf("    pop rbp\n");
-            printf("    ret\n");
+            printf("    jmp .Lend%03d\n", control_flow_count);
+            printf(".Lelse%03d:\n", control_flow_count);
+            if (node->els) {
+                gen(node->els);
+            }
             printf(".Lend%03d:\n", control_flow_count);
             control_flow_count += 1;
+            return;
         }
     }
 
-    if (node->lhs) {
-        gen(node->lhs);
-    }
-    if (node->rhs) {
-        gen(node->rhs);
-    }
+    gen(node->lhs);
+    gen(node->rhs);
 
     printf("    pop rdi\n");
     printf("    pop rax\n");

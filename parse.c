@@ -20,6 +20,13 @@ void error_at(char *loc, char *fmt, ...) {
 }
 
 /**
+ * Keywords
+ * */
+char *KW_RETURN = "return";
+char *KW_IF = "if";
+char * KW_ELSE = "else";
+
+/**
  * Tokenizer
  * */
 bool consume(char *op) {
@@ -149,15 +156,24 @@ Token *tokenize(char *p) {
             }
         }
 
-        if (is_reserved_keyword(p, "return")) {
-            cur = new_token(TK_RETURN, cur, p, 6);
-            p += 6;
+        if (is_reserved_keyword(p, KW_RETURN)) {
+            int keylen = strlen(KW_RETURN);
+            cur = new_token(TK_RETURN, cur, p, keylen);
+            p += keylen;
             continue;
         }
 
-        if (is_reserved_keyword(p, "if")) {
-            cur = new_token(TK_IF, cur, p, 2);
-            p += 2;
+        if (is_reserved_keyword(p, KW_IF)) {
+            int keylen = strlen(KW_IF);
+            cur = new_token(TK_IF, cur, p, keylen);
+            p += keylen;
+            continue;
+        }
+
+        if (is_reserved_keyword(p, KW_ELSE)) {
+            int keylen = strlen(KW_ELSE);
+            cur = new_token(TK_ELSE, cur, p, keylen);
+            p += keylen;
             continue;
         }
 
@@ -325,18 +341,21 @@ Node *expr() {
 Node *stmt() {
     Node *node;
 
-    if (consume("return")) {
+    if (consume(KW_RETURN)) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();
         expect(";");
-    } else if (consume("if")) {
+    } else if (consume(KW_IF)) {
         expect("(");
         node = calloc(1, sizeof(Node));
         node->kind = ND_IF;
         node->cond = expr();
         expect(")");
         node->then = stmt();
+        if (consume(KW_ELSE)) {
+            node->els = stmt();
+        }
     } else {
         node = expr();
         expect(";");
