@@ -134,3 +134,7 @@ main:
 ```
 
 We need to clear arranged registers (or stacks?)
+
+## Implement for
+
+We need to handle `a = 1; for (;;) return a;`. If cond is null, generate `push 0` for cmp always is true .
