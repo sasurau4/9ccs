@@ -96,9 +96,8 @@ void gen(Node *node) {
             if (node->cond) {
                 gen(node->cond);
             } else {
-                printf("    push 0");
-            }
-            printf("    #piyo\n");
+                printf("    push 0\n");
+            } 
             printf("    pop rax\n");
             printf("    cmp rax, 0\n");
             printf("    je  .Lend%03d\n", cfcount);
