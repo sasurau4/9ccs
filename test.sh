@@ -71,5 +71,15 @@ assert 10 "a = 10; for (b = 0;; b = b + 1) a = a + 1; a;"
 assert 3 "for (b = 0; b < 3;) b = b + 1; b;"
 assert 1 "a = 1; for (;;) return a;"
 assert 1 "a = 1; for (;;) return 1;"
+assert 1 "{ return 1; }"
+assert 10 "if (1) {
+    a = 10;
+    b = 2;
+    return a;
+} else {
+    a = 1;
+    b = 3;
+    return b;
+}"
 
 echo OK

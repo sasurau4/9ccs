@@ -1,9 +1,3 @@
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "9ccs.h"
 
 void error_at(char *loc, char *fmt, ...) {
@@ -149,7 +143,9 @@ Token *tokenize(char *p) {
             case '<': 
             case '>': 
             case '=': 
-            case ';': {
+            case ';': 
+            case '{': 
+            case '}': {
                 cur = new_token(TK_RESERVED, cur, p++, 1);
                 continue;
             }
@@ -396,6 +392,14 @@ Node *stmt() {
             expect(")");
         }
         node->body = stmt();
+    } else if (consume("{")) {
+        Vector *stmts = new_vec();
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_BLOCK;
+        while (!consume("}")) {
+            vec_push(stmts, stmt());
+        }
+        node->stmts = stmts;
     } else {
         node = expr();
         expect(";");

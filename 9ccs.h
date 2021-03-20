@@ -1,3 +1,12 @@
+#include <ctype.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <assert.h>
 
 typedef enum {
     TK_RESERVED,
@@ -37,7 +46,22 @@ typedef enum {
     ND_IF,
     ND_WHILE,
     ND_FOR,
+    ND_BLOCK,
 } NodeKind;
+
+typedef struct {
+    void **data;
+    int capacity;
+    int len;
+} Vector;
+
+Vector *new_vec(void);
+void vec_push(Vector *v, void *elem);
+void vec_pushi(Vector *v, int val);
+void *vec_pop(Vector *v);
+void *vec_last(Vector *v);
+bool vec_contains(Vector *v, void *elem);
+bool vec_union1(Vector *v, void *elem);
 
 typedef struct Node Node;
 
@@ -45,6 +69,8 @@ struct Node {
     NodeKind kind;
     Node *lhs;
     Node *rhs;
+
+    Vector *stmts; // Compound statement
     // "if" (cond) then "else" els
     // "while" (cond) body
     // "for" (init; cond; inc) body

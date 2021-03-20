@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdarg.h>
-#include <stdlib.h>
 #include "9ccs.h"
 
 // Use for label name for control flow
@@ -108,7 +105,13 @@ void gen(Node *node) {
             printf("    jmp .Lbegin%03d\n", cfcount);
             printf(".Lend%03d:\n", cfcount);
             return;
-
+        }
+        case ND_BLOCK: {
+            for (int i = 0; i < node->stmts->len; i++) {
+                gen(node->stmts->data[i]);
+                printf("   pop rax\n");
+            }
+            return;
         }
     }
 
