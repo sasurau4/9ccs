@@ -1,6 +1,6 @@
 ## 9ccs
 
-9ccs is 9cc-syakyou edition. Syakyou means copy for hands-on in Japanese.
+9ccs is 9cc-syakyou edition. Syakyou means copy with hands in Japanese.
 
 See https://www.sigbus.info/compilerbook
 
@@ -137,4 +137,10 @@ We need to clear arranged registers (or stacks?)
 
 ## Implement for
 
-We need to handle `a = 1; for (;;) return a;`. If cond is null, generate `push 0\n` for cmp always is true .
+We need to handle `a = 1; for (;;) return a;`. If cond is null, generate `push 0\n` for cmp always is true.
+
+## Impl function call
+
+Missing `#define _GNU_SOURCE` and occured SIGSEGV.
+
+https://stackoverflow.com/questions/5582211/what-does-define-gnu-source-imply
