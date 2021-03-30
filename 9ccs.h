@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -47,6 +48,7 @@ typedef enum {
     ND_WHILE,
     ND_FOR,
     ND_BLOCK,
+    ND_CALL,
 } NodeKind;
 
 typedef struct {
@@ -63,6 +65,18 @@ void *vec_last(Vector *v);
 bool vec_contains(Vector *v, void *elem);
 bool vec_union1(Vector *v, void *elem);
 
+typedef struct {
+    Vector *keys;
+    Vector *vals;
+} Map;
+
+Map *new_map(void);
+void map_put(Map *map, char *key, void *val);
+void map_puti(Map *map, char *key, int val);
+void *map_get(Map *map, char *key);
+int map_geti(Map *map, char *key, int default_);
+bool map_exists(Map *map, char *key);
+
 typedef struct Node Node;
 
 struct Node {
@@ -70,7 +84,10 @@ struct Node {
     Node *lhs;
     Node *rhs;
 
+    char *name;
+
     Vector *stmts; // Compound statement
+    Vector *args; // Function call
     // "if" (cond) then "else" els
     // "while" (cond) body
     // "for" (init; cond; inc) body

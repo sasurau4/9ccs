@@ -144,6 +144,7 @@ Token *tokenize(char *p) {
             case '>': 
             case '=': 
             case ';': 
+            case ',': 
             case '{': 
             case '}': {
                 cur = new_token(TK_RESERVED, cur, p++, 1);
@@ -245,6 +246,27 @@ Node *primary() {
 
     Token *tok = consume_ident();
     if (tok) {
+        if (consume("(")) {
+            Node *node = calloc(1, sizeof(Node));
+            node->kind = ND_CALL;
+            node->name = strndup(tok->str, tok->len);
+            node->args = new_vec();
+            for(;;) {
+                if (consume(")")) {
+                    return node;
+                } else if (consume(",")){
+                    Node *arg = primary();
+                    vec_push(node->args, arg);
+                } else {
+                    Node *arg = primary();
+                    vec_push(node->args, arg);
+                }
+                if (node->args->len > 6) {
+                    error_at(token->str, "Function args exceed 6");
+                }
+            }
+        }
+
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
 

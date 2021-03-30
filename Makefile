@@ -1,4 +1,5 @@
 CFLAGS=-std=c11 -g3 -static
+# SRCS=$(filter-out foo.c, $(wildcard *.c))
 SRCS=$(wildcard *.c)
 OBJS=$(SRCS:.c=.o)
 

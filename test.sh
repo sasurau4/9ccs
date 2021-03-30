@@ -4,7 +4,7 @@ assert() {
     input="$2"
 
     ./9ccs "$input" > tmp.s
-    cc -o tmp tmp.s
+    cc -o tmp tmp.s foo.o
     ./tmp
     actual="$?"
 
@@ -81,5 +81,7 @@ assert 10 "if (1) {
     b = 3;
     return b;
 }"
+assert 1 "foo(); return 1;";
+assert 1 "bar(3, 4); return 1;";
 
 echo OK

@@ -109,8 +109,44 @@ void gen(Node *node) {
         case ND_BLOCK: {
             for (int i = 0; i < node->stmts->len; i++) {
                 gen(node->stmts->data[i]);
-                printf("   pop rax\n");
+                printf("    pop rax\n");
             }
+            return;
+        }
+        case ND_CALL: {
+            for (int i = 0; i < node->args->len; i++) {
+                gen(node->args->data[i]);
+                char *register_name;
+                switch(i) {
+                    case 0: {
+                        register_name = "rdi";
+                        break;
+                    }
+                    case 1: {
+                        register_name = "rsi";
+                        break;
+                    }
+                    case 2: {
+                        register_name = "rdx";
+                        break;
+                    }
+                    case 3: {
+                        register_name = "rcx";
+                        break;
+                    }
+                    case 4: {
+                        register_name = "r8";
+                        break;
+                    }
+                    case 5: {
+                        register_name = "r9";
+                        break;
+                    }
+                }
+                printf("    pop rax\n");
+                printf("    mov %s, rax\n", register_name);
+            }
+            printf("    call %s\n", node->name);
             return;
         }
     }
