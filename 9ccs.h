@@ -147,5 +147,4 @@ void gen_func(Function *func);
  * */
 extern Token *token;
 extern char *user_input;
-extern Node *code[100];
 extern Vector *lvars;
