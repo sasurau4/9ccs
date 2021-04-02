@@ -4,7 +4,7 @@ assert() {
     input="$2"
 
     ./9ccs "$input" > tmp.s
-    cc -o tmp tmp.s foo.o
+    cc -o tmp tmp.s test_func.o
     ./tmp
     actual="$?"
 
@@ -81,9 +81,8 @@ assert 10 "main() { if (1) {
     b = 3;
     return b;
 } }"
-assert 1 "main() { foo(); return 1; }";
-assert 1 "main() { bar(3, 4); return 1; }";
-assert 7 "main() { return bar(3, 4); }";
+assert 1 "main() { shout(); return 1; }";
+assert 7 "main() { return sum(3, 4); }";
 assert 2 "
 main() {
     return 2;
