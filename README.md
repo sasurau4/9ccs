@@ -144,3 +144,68 @@ We need to handle `a = 1; for (;;) return a;`. If cond is null, generate `push 0
 Missing `#define _GNU_SOURCE` and occured SIGSEGV.
 
 https://stackoverflow.com/questions/5582211/what-does-define-gnu-source-imply
+
+## Impl function definition
+
+### stack and queue
+
+Input `main() { a = 52; a; }`
+
+I implemented `gen(vec_pop(node->stmts));` for `ND_FUNC` at `codegen.c`
+
+But this input AST is `[[{kind: ND_ASSIGN}], [{kind: ND_LVAR}]]`
+
+pop op break the order of node. For my case, compiler generate `ND_LVAR` first and then generate for `ND_ASSIGN`. 
+
+I fixed it with `gen(node->stmts->data[i])`.
+
+### Difference with 9ccs and real C semantics
+
+All statements automatically return each value in my own C with 9ccs until now. For example, `main() { 2; }` return `2`.
+
+This cause problem with `foo() { 2; } main() { foo(); }`. I need this return `2`.
+
+But this code emits following and the return is `0`.
+
+```assembly
+.intel_syntax noprefix
+.globl buzz
+buzz: 
+    push rbp
+    mov rbp, rsp
+    sub rsp, 0 # prologue
+    push 3
+    pop rax
+    mov rsp, rbp # epilogue
+    pop rbp
+    ret
+.globl main
+main: 
+    push rbp
+    mov rbp, rsp
+    sub rsp, 0 # prologue
+    call buzz # <- RAX is 3
+    pop rax # <- CAUSE: 3 is popped and RAX is 0
+    mov rsp, rbp # epilogue
+    pop rbp
+    ret # <- return is 0
+
+```
+
+The `pop rax` after `call buzz` is unnecessary. It seems bad to prevent `pop rax` when `ND_CALL` because the AST is same between `foo() { 2; }` and `main() {foo();}`.
+
+In real C, `int foo() { 2; } void main() { printf("foo: %i", foo())}` emit `foo: 0`.
+
+So, C needs `return` statement to return value. Without it, no value returned. For example, https://godbolt.org/z/nvbdEf8fM
+
+From now on, my own C need to follow real C semantics.
+
+## ND_RETURN assumption
+
+```c
+            if (node->lhs->kind != ND_CALL) {
+                // All operations except function call left calculated value at stack top.
+                // function call already left return value at RAX, so not pop stack to RAX.
+                printf("    pop rax\n");
+            }
+```

@@ -105,7 +105,9 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
 }
 
 LVar *find_lvar(Token *tok) {
-    for (LVar *var = locals; var; var = var->next) {
+    for (int i = 0; i < lvars->len; i++) {
+        LVar *var;
+        var = lvars->data[i];
         if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)) {
             return var;
         }
@@ -275,12 +277,11 @@ Node *primary() {
             node->offset = lvar->offset;
         } else {
             lvar = calloc(1, sizeof(LVar));
-            lvar->next = locals ? locals : NULL;
             lvar->name = tok->str;
             lvar->len = tok->len;
-            lvar->offset = locals ? locals->offset + 8 : 8;
+            lvar->offset = (lvars->len + 1) * 8;
             node->offset = lvar->offset;
-            locals = lvar;
+            vec_push(lvars, lvar);
         }
         return node;
     }
@@ -430,10 +431,52 @@ Node *stmt() {
     return node;
 }
 
-void program() {
-    int i = 0;
-    while (!at_eof()) {
-        code[i++] = stmt();
+Program *parse() {
+    Program *program;
+    program = calloc(1, sizeof(Program));
+    Vector *funcs = new_vec();
+
+    while(!at_eof()) {
+        Node *node;
+        Vector *params;
+
+        Function *func;
+        // From global var
+        lvars = new_vec();
+        // From local var
+        func = calloc(1, sizeof(Function));
+
+        node = calloc(1, sizeof(Node));
+        params = new_vec();
+        node->kind = ND_FUNC;
+
+        Token *tok = consume_ident();
+        if(!tok) {
+            error_at(token->str, "Top level expect function defs");
+        }
+        // TODO: rename tok->str to name when lexixing
+        char *name = strndup(tok->str, tok->len);
+        func->name = name;
+        node->name = name;
+        expect("(");
+        while(!consume(")")) {
+            Token *tok = consume_ident();
+            if(!tok) {
+                error_at(token->str, "Expect param identifier");
+            }
+            Node *node;
+            node = primary();
+            // TODO: param to lvar
+            vec_push(params, node);
+            consume(",");
+        }
+        node->body = stmt();
+        node->params = params;
+        func->lvars = lvars;
+        func->node = node;
+        vec_push(funcs, func);
     }
-    code[i] = NULL;
+
+    program->funcs = funcs;
+    return program;
 }

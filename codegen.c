@@ -22,7 +22,30 @@ void gen_lval(Node *node) {
     printf("    push rax\n");
 
 }
+
+void gen_func(Function *func) {
+    // Prologue
+    printf(".globl %s\n", func->name);
+    printf("%s: \n", func->name);
+
+    // Acquire space for variables
+    printf("    push rbp\n");
+    printf("    mov rbp, rsp\n");
+    // A variable space is fixed of 8
+    printf("    sub rsp, %d\n", func->lvars->len * 8);
+
+    gen(func->node->body);
+
+    // Epilogue
+    // The result of last statement left on RAX, we return it
+    printf("    # Epilogue for func\n");
+    printf("    mov rsp, rbp\n");
+    printf("    pop rbp\n");
+    printf("    ret\n");
+}
+
 void gen(Node *node) {
+    printf("    # debug: node->kind: %i\n", node->kind);
     // For one line stmts
     switch (node->kind) {
         case ND_NUM: {
@@ -48,7 +71,12 @@ void gen(Node *node) {
         }
         case ND_RETURN: {
             gen(node->lhs);
-            printf("    pop rax\n");
+            // Is it correct to handle special for ND_CALL?
+            if (node->lhs->kind != ND_CALL) {
+                // All operations except function call left calculated value at stack top.
+                // function call already left return value at RAX, so not pop stack to RAX.
+                printf("    pop rax\n");
+            }
             printf("    mov rsp, rbp\n");
             printf("    pop rbp\n");
             printf("    ret\n");
@@ -92,8 +120,6 @@ void gen(Node *node) {
             printf(".Lbegin%03d:\n", cfcount);
             if (node->cond) {
                 gen(node->cond);
-            } else {
-                printf("    push 0\n");
             } 
             printf("    pop rax\n");
             printf("    cmp rax, 0\n");
@@ -109,7 +135,6 @@ void gen(Node *node) {
         case ND_BLOCK: {
             for (int i = 0; i < node->stmts->len; i++) {
                 gen(node->stmts->data[i]);
-                printf("    pop rax\n");
             }
             return;
         }

@@ -32,23 +32,24 @@ struct Token {
 };
 
 typedef enum {
-    ND_ADD,
-    ND_SUB,
-    ND_MUL,
-    ND_DIV,
-    ND_EQ,
-    ND_NOT_EQ,
-    ND_LT,
-    ND_LE,
-    ND_NUM,
-    ND_ASSIGN,
-    ND_LVAR,
-    ND_RETURN,
-    ND_IF,
-    ND_WHILE,
-    ND_FOR,
-    ND_BLOCK,
-    ND_CALL,
+    ND_ADD, // 0
+    ND_SUB, // 1
+    ND_MUL, // 2
+    ND_DIV, // 3
+    ND_EQ, // 4
+    ND_NOT_EQ, // 5
+    ND_LT, // 6
+    ND_LE, // 7
+    ND_NUM, // 8
+    ND_ASSIGN, // 9
+    ND_LVAR, // 10
+    ND_RETURN, // 11
+    ND_IF, // 12
+    ND_WHILE, // 13
+    ND_FOR, // 14
+    ND_BLOCK, // 15
+    ND_CALL, // 16
+    ND_FUNC, // 17
 } NodeKind;
 
 typedef struct {
@@ -88,6 +89,7 @@ struct Node {
 
     Vector *stmts; // Compound statement
     Vector *args; // Function call
+    Vector *params; // Function defenition
     // "if" (cond) then "else" els
     // "while" (cond) body
     // "for" (init; cond; inc) body
@@ -104,17 +106,26 @@ struct Node {
 typedef struct LVar LVar;
 
 struct LVar {
-    LVar *next; // Next var or NULL
     char *name; // The name of var
     int len; // The length of var name
     int offset; // Offset from RBP
 };
 
+typedef struct {
+    char *name;
+    Node *node;
+    Vector *lvars;
+} Function;
+
+typedef struct {
+    Vector *funcs;
+} Program;
+
 /**
  * parser
  * */
 Token *tokenize(char *p);
-void program();
+Program *parse();
 Node *stmt();
 Node *expr();
 Node *assign();
@@ -129,6 +140,7 @@ Node *primary();
  * codegen
  * */
 void gen(Node *node);
+void gen_func(Function *func);
 
 /**
  * Globals
@@ -136,4 +148,4 @@ void gen(Node *node);
 extern Token *token;
 extern char *user_input;
 extern Node *code[100];
-extern LVar *locals;
+extern Vector *lvars;
