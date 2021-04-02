@@ -98,7 +98,8 @@ bool is_reserved_keyword(const char *str, const char *keyword) {
 Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
     Token *tok = calloc(1, sizeof(Token));
     tok->kind = kind;
-    tok->str = str;
+    char *tokstr = strndup(str, len);
+    tok->str = tokstr;
     tok->len = len;
     cur->next = tok;
     return tok;
@@ -251,7 +252,7 @@ Node *primary() {
         if (consume("(")) {
             Node *node = calloc(1, sizeof(Node));
             node->kind = ND_CALL;
-            node->name = strndup(tok->str, tok->len);
+            node->name = tok->str;
             node->args = new_vec();
             for(;;) {
                 if (consume(")")) {
@@ -454,10 +455,8 @@ Program *parse() {
         if(!tok) {
             error_at(token->str, "Top level expect function defs");
         }
-        // TODO: rename tok->str to name when lexixing
-        char *name = strndup(tok->str, tok->len);
-        func->name = name;
-        node->name = name;
+        func->name = tok->str;
+        node->name = tok->str;
         expect("(");
         while(!consume(")")) {
             Token *tok = consume_ident();
