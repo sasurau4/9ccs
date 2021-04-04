@@ -9,6 +9,7 @@ char *user_input;
 Token *token;
 Program *program;
 Vector *lvars;
+Vector *funcs;
 
 int main(int argc, char **argv) {
     if (argc != 2) {

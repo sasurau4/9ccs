@@ -105,6 +105,15 @@ main() {
     return buzz(4);
 }
 "
+assert 3 "
+buzz(x) {
+    return x;
+}
+
+main() {
+    return buzz(4 - 1);
+}
+"
 assert 4 "
 buzz(x, y) {
     return x + y;

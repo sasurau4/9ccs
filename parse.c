@@ -116,6 +116,17 @@ LVar *find_lvar(Token *tok) {
     return NULL;
 }
 
+Function *find_func(Token *tok) {
+    for (int i = 0; i < funcs->len; i++) {
+        Function *func;
+        func = funcs->data[i];
+        if(!memcmp(tok->str, func->name, tok->len)) {
+            return func;
+        }
+    }
+    return NULL;
+}
+
 Token *tokenize(char *p) {
     Token head;
     head.next = NULL;
@@ -266,10 +277,10 @@ Node *primary() {
                 if (consume(")")) {
                     return node;
                 } else if (consume(",")){
-                    Node *arg = primary();
+                    Node *arg = expr();
                     vec_push(node->args, arg);
                 } else {
-                    Node *arg = primary();
+                    Node *arg = expr();
                     vec_push(node->args, arg);
                 }
                 if (node->args->len > 6) {
@@ -440,7 +451,7 @@ Node *stmt() {
 Program *parse() {
     Program *program;
     program = calloc(1, sizeof(Program));
-    Vector *funcs = new_vec();
+    funcs = new_vec();
 
     while(!at_eof()) {
         Node *node;
@@ -464,7 +475,7 @@ Program *parse() {
         node->name = tok->str;
         expect("(");
         while(!consume(")")) {
-            Node *param = primary();
+            Node *param = expr();
             vec_push(params, param);
             consume(",");
         }

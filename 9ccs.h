@@ -148,3 +148,4 @@ void gen_func(Function *func);
 extern Token *token;
 extern char *user_input;
 extern Vector *lvars;
+extern Vector *funcs;

@@ -200,7 +200,7 @@ So, C needs `return` statement to return value. Without it, no value returned. F
 
 From now on, my own C need to follow real C semantics.
 
-## ND_RETURN assumption
+### ND_RETURN assumption
 
 ```c
             if (node->lhs->kind != ND_CALL) {
@@ -209,3 +209,7 @@ From now on, my own C need to follow real C semantics.
                 printf("    pop rax\n");
             }
 ```
+
+### arg is expression
+
+Remember `foo(2 - 1);`. Arg is not `primary`, it's `expr`.
