@@ -15,7 +15,13 @@ assert() {
         exit 1
     fi
 }
-
+## assert 1 "
+## fibonacci(x) {
+##     if (x < 2) return x;
+##     return fibonacci(x - 2);
+## }
+## main() { return fibonacci(2); }"
+## exit 0
 assert 0 'main() { return 0; }'
 assert 42 "main() { return 42; }"
 assert 25 "main() { return 5+20; }"
@@ -103,6 +109,18 @@ buzz(x) {
 
 main() {
     return buzz(4);
+}
+"
+assert 5 "
+double(x) {
+    return x;
+}
+triple(x) {
+    return x;
+}
+
+main() {
+    return double(2) + triple(3);
 }
 "
 assert 3 "

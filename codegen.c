@@ -181,6 +181,7 @@ void gen(Node *node) {
                 printf("    mov %s, rax\n", register_name);
             }
             printf("    call %s\n", node->name);
+            printf("    push rax\n");
             return;
         }
     }
