@@ -96,14 +96,32 @@ main() {
     return buzz();
 }
 "
-# assert 3 "
-# buzz(x, y) {
-#     return x + y;
-# }
-# 
-# main() {
-#     return buzz(1, 3);
-# }
-# "
+assert 4 "
+buzz(x) {
+    return x;
+}
+
+main() {
+    return buzz(4);
+}
+"
+assert 4 "
+buzz(x, y) {
+    return x + y;
+}
+
+main() {
+    return buzz(1, 3);
+}
+"
+assert 19 "
+buzz(x, y, z) {
+    return x * 3 + y * 2 + z;
+}
+
+main() {
+    return buzz(1, 3, 10);
+}
+"
 
 echo OK

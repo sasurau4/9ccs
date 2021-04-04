@@ -240,6 +240,14 @@ Node *new_node_num(int val) {
     return node;
 }
 
+LVar *new_lvar(Token *tok) {
+    LVar *lvar = calloc(1, sizeof(LVar));
+    lvar->name = tok->str;
+    lvar->len = tok->len;
+    lvar->offset = (lvars->len + 1) * 8;
+    return lvar;
+}
+
 Node *primary() {
     if (consume("(")) {
         Node *node = expr();
@@ -277,10 +285,7 @@ Node *primary() {
         if (lvar) {
             node->offset = lvar->offset;
         } else {
-            lvar = calloc(1, sizeof(LVar));
-            lvar->name = tok->str;
-            lvar->len = tok->len;
-            lvar->offset = (lvars->len + 1) * 8;
+            LVar *lvar = new_lvar(tok);
             node->offset = lvar->offset;
             vec_push(lvars, lvar);
         }
@@ -459,14 +464,8 @@ Program *parse() {
         node->name = tok->str;
         expect("(");
         while(!consume(")")) {
-            Token *tok = consume_ident();
-            if(!tok) {
-                error_at(token->str, "Expect param identifier");
-            }
-            Node *node;
-            node = primary();
-            // TODO: param to lvar
-            vec_push(params, node);
+            Node *param = primary();
+            vec_push(params, param);
             consume(",");
         }
         node->body = stmt();

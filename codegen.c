@@ -12,6 +12,33 @@ void error(char *fmt, ...) {
     exit(1);
 }
 
+// TODO: refactor to Map
+char *gen_arg_reg_name(int i) {
+    switch(i) {
+        case 0: {
+            return "rdi";
+        }
+        case 1: {
+            return "rsi";
+        }
+        case 2: {
+            return "rdx";
+        }
+        case 3: {
+            return "rcx";
+        }
+        case 4: {
+            return "r8";
+        }
+        case 5: {
+            return "r9";
+        }
+        default: {
+            error("Argument count exceed 6 but %i\n", i);
+        }
+    }
+}
+
 void gen_lval(Node *node) {
     if (node->kind != ND_LVAR) {
         error("Left value of assignment is not variable");
@@ -33,6 +60,14 @@ void gen_func(Function *func) {
     printf("    mov rbp, rsp\n");
     // A variable space is fixed of 8
     printf("    sub rsp, %d\n", func->lvars->len * 8);
+
+    // Gen params
+    for(int i = 0; i < func->node->params->len; i++) {
+        Node *node = func->node->params->data[i];
+        printf("    mov rax, rbp\n");
+        printf("    sub rax, %d\n", node->offset);
+        printf("    mov [rax], %s\n", gen_arg_reg_name(i));
+    }
 
     gen(func->node->body);
 
@@ -141,33 +176,7 @@ void gen(Node *node) {
         case ND_CALL: {
             for (int i = 0; i < node->args->len; i++) {
                 gen(node->args->data[i]);
-                char *register_name;
-                switch(i) {
-                    case 0: {
-                        register_name = "rdi";
-                        break;
-                    }
-                    case 1: {
-                        register_name = "rsi";
-                        break;
-                    }
-                    case 2: {
-                        register_name = "rdx";
-                        break;
-                    }
-                    case 3: {
-                        register_name = "rcx";
-                        break;
-                    }
-                    case 4: {
-                        register_name = "r8";
-                        break;
-                    }
-                    case 5: {
-                        register_name = "r9";
-                        break;
-                    }
-                }
+                char *register_name = gen_arg_reg_name(i);
                 printf("    pop rax\n");
                 printf("    mov %s, rax\n", register_name);
             }
