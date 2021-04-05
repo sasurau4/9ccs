@@ -15,13 +15,6 @@ assert() {
         exit 1
     fi
 }
-## assert 1 "
-## fibonacci(x) {
-##     if (x < 2) return x;
-##     return fibonacci(x - 2);
-## }
-## main() { return fibonacci(2); }"
-## exit 0
 assert 0 'main() { return 0; }'
 assert 42 "main() { return 42; }"
 assert 25 "main() { return 5+20; }"
@@ -111,12 +104,12 @@ main() {
     return buzz(4);
 }
 "
-assert 5 "
+assert 13 "
 double(x) {
-    return x;
+    return x * 2;
 }
 triple(x) {
-    return x;
+    return x * 3;
 }
 
 main() {
@@ -150,5 +143,11 @@ main() {
     return buzz(1, 3, 10);
 }
 "
+assert 55 "
+fibonacci(x) {
+    if (x < 2) return x;
+    return fibonacci(x - 1) + fibonacci(x - 2);
+}
+main() { return fibonacci(10); }"
 
 echo OK
