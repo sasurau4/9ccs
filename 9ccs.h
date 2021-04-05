@@ -50,6 +50,8 @@ typedef enum {
     ND_BLOCK, // 15
     ND_CALL, // 16
     ND_FUNC, // 17
+    ND_ADDR, // 18
+    ND_DEREF, // 19
 } NodeKind;
 
 typedef struct {
