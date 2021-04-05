@@ -213,3 +213,9 @@ From now on, my own C need to follow real C semantics.
 ### arg is expression
 
 Remember `foo(2 - 1);`. Arg is not `primary`, it's `expr`. If arg is `primary`, the parser go infinite loop and never end.
+
+## error_at broken
+
+error_at function broken at e9434af401b6b9841eeb2110525c79ea898fee7c.
+
+It cause infinite loop when error_at calling because token->str doesn't have all entire string after token but only token str.
