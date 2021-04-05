@@ -1,12 +1,17 @@
 #include "9ccs.h"
 
-void error_at(char *loc, char *fmt, ...) {
+void error_at(Token *token, char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
 
-    int pos = loc - user_input;
-    fprintf(stderr, "%s\n", user_input);
-    fprintf(stderr, "%*s", pos, " ");
+    int ln = token->ln;
+    fprintf(stderr, "Error at %d:%d\n", ln, token->col);
+    fprintf(stderr, "%s", token->str);
+    while(token->next && token->next->ln == ln) {
+        fprintf(stderr, " %s", token->next->str);
+        token = token->next;
+    }
+    fprintf(stderr, "\n");
     fprintf(stderr, "^ ");
     vfprintf(stderr, fmt, ap);
     fprintf(stderr, "\n");
@@ -21,6 +26,7 @@ char *KW_IF = "if";
 char *KW_ELSE = "else";
 char *KW_WHILE = "while"; 
 char *KW_FOR = "for";
+char *KW_INT = "int";
 
 /**
  * Tokenizer
@@ -55,18 +61,24 @@ Token *consume_ident() {
 }
 
 void expect(char *op) {
+    if (token->kind == TK_INT && op == KW_INT) {
+        token = token->next;
+        return;
+    }
+    // TODO: refactor to kind base switch stmt
     if (token->kind != TK_RESERVED || 
         strlen(op) != token->len || 
         memcmp(token->str, op, token->len)) {
-        printf("expect, '%s'.", op);
-        error_at(token->str, op);
+        char *err;
+        sprintf(err, "Expect keyword: %s.", op);
+        error_at(token, err);
     }
     token = token->next;
 }
 
 int expect_number() {
     if (token->kind != TK_NUM) {
-        error_at(token->str, "Not a number");
+        error_at(token, "Not a number");
     }
     int val = token->val;
     token = token->next;
@@ -95,12 +107,14 @@ bool is_reserved_keyword(const char *str, const char *keyword) {
     return strncmp(str, keyword, lenkw) == 0 && !is_alnum(str[lenkw]);
 }
 
-Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
+Token *new_token(TokenKind kind, Token *cur, char *str, int len, int ln, int col) {
     Token *tok = calloc(1, sizeof(Token));
     tok->kind = kind;
     char *tokstr = strndup(str, len);
     tok->str = tokstr;
     tok->len = len;
+    tok->ln = ln;
+    tok->col = col;
     cur->next = tok;
     return tok;
 }
@@ -131,9 +145,18 @@ Token *tokenize(char *p) {
     Token head;
     head.next = NULL;
     Token *cur = &head;
+    int ln = 1;
+    int col = 1;
 
     while (*p) {
+        if (*p == '\n') {
+            ln += 1;
+            col = 0;
+            p++;
+            continue;
+        }
         if (isspace(*p)) {
+            col++;
             p++;
             continue;
         }
@@ -142,8 +165,9 @@ Token *tokenize(char *p) {
             starts_with("!=", p) || 
             starts_with(">=", p) ||
             starts_with("<=", p)) {
-            cur = new_token(TK_RESERVED, cur, p, 2);
+            cur = new_token(TK_RESERVED, cur, p, 2, ln, col);
             p = p+2;
+            col += 2;
             continue;
         }
 
@@ -162,7 +186,7 @@ Token *tokenize(char *p) {
             case '&': 
             case '{': 
             case '}': {
-                cur = new_token(TK_RESERVED, cur, p++, 1);
+                cur = new_token(TK_RESERVED, cur, p++, 1, ln, col++);
                 continue;
             }
             default: {
@@ -172,42 +196,58 @@ Token *tokenize(char *p) {
 
         if (is_reserved_keyword(p, KW_RETURN)) {
             int keylen = strlen(KW_RETURN);
-            cur = new_token(TK_RETURN, cur, p, keylen);
+            cur = new_token(TK_RETURN, cur, p, keylen, ln, col);
             p += keylen;
+            col += keylen;
             continue;
         }
 
         if (is_reserved_keyword(p, KW_IF)) {
             int keylen = strlen(KW_IF);
-            cur = new_token(TK_IF, cur, p, keylen);
+            cur = new_token(TK_IF, cur, p, keylen, ln, col);
             p += keylen;
+            col += keylen;
             continue;
         }
 
         if (is_reserved_keyword(p, KW_ELSE)) {
             int keylen = strlen(KW_ELSE);
-            cur = new_token(TK_ELSE, cur, p, keylen);
+            cur = new_token(TK_ELSE, cur, p, keylen, ln, col);
             p += keylen;
+            col += keylen;
             continue;
         }
 
         if (is_reserved_keyword(p, KW_WHILE)) {
             int keylen = strlen(KW_WHILE);
-            cur = new_token(TK_ELSE, cur, p, keylen);
+            cur = new_token(TK_ELSE, cur, p, keylen, ln, col);
             p += keylen;
+            col += keylen;
             continue;
         }
 
         if (is_reserved_keyword(p, KW_FOR)) {
             int keylen = strlen(KW_FOR);
-            cur = new_token(TK_FOR, cur, p, keylen);
+            cur = new_token(TK_FOR, cur, p, keylen, ln, col);
             p += keylen;
+            col += keylen;
+            continue;
+        }
+
+        if (is_reserved_keyword(p, KW_INT)) {
+            int keylen = strlen(KW_INT);
+            cur = new_token(TK_INT, cur, p, keylen, ln, col);
+            p += keylen;
+            col += keylen;
             continue;
         }
 
         if (isdigit(*p)) {
-            cur = new_token(TK_NUM, cur, p, 0);
+            cur = new_token(TK_NUM, cur, p, 0, ln, col);
             cur->val = strtol(p, &p, 10);
+            char valstr[8];
+            sprintf(valstr, "%d", cur->val);
+            col += strlen(valstr);
             continue;
         }
 
@@ -217,16 +257,17 @@ Token *tokenize(char *p) {
                 i += 1;
                 continue;
             }
-            cur = new_token(TK_IDENT, cur, p, i);
+            cur = new_token(TK_IDENT, cur, p, i, ln, col);
             p += i;
+            col += i;
             continue;
         }
 
 
-        error_at(token->str, "Can't tokenize");
+        error_at(token, "Can't tokenize");
     }
 
-    new_token(TK_EOF, cur, p, 1);
+    new_token(TK_EOF, cur, p, 1, ln, col);
     return head.next;
 }
 
@@ -285,7 +326,7 @@ Node *primary() {
                     vec_push(node->args, arg);
                 }
                 if (node->args->len > 6) {
-                    error_at(token->str, "Function args exceed 6");
+                    error_at(token, "Function args exceed 6");
                 }
             }
         }
@@ -297,10 +338,21 @@ Node *primary() {
         if (lvar) {
             node->offset = lvar->offset;
         } else {
-            LVar *lvar = new_lvar(tok);
-            node->offset = lvar->offset;
-            vec_push(lvars, lvar);
+            error_at(tok, "Local variable not defined.");
         }
+        return node;
+    }
+
+    if (consume(KW_INT)) {
+        Token *tok = consume_ident();
+        if(!tok) {
+            error_at(token, "Expect ident.");
+        }
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_LVAR;
+        LVar *lvar = new_lvar(tok);
+        node->offset = lvar->offset;
+        vec_push(lvars, lvar);
         return node;
     }
 
@@ -472,9 +524,10 @@ Program *parse() {
         params = new_vec();
         node->kind = ND_FUNC;
 
+        expect(KW_INT);
         Token *tok = consume_ident();
         if(!tok) {
-            error_at(token->str, "Top level expect function defs");
+            error_at(token, "Top level expect function defs");
         }
         func->name = tok->str;
         node->name = tok->str;

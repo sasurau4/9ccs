@@ -16,6 +16,7 @@ typedef enum {
     TK_ELSE,
     TK_WHILE,
     TK_FOR,
+    TK_INT,
     TK_IDENT,
     TK_NUM,
     TK_EOF,
@@ -29,6 +30,9 @@ struct Token {
     int val;
     char *str;
     int len;
+    // For error info
+    int ln;
+    int col;
 };
 
 typedef enum {
