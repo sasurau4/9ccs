@@ -213,3 +213,15 @@ From now on, my own C need to follow real C semantics.
 ### arg is expression
 
 Remember `foo(2 - 1);`. Arg is not `primary`, it's `expr`. If arg is `primary`, the parser go infinite loop and never end.
+
+## Mac
+
+```
+docker build -t compilerbook https://www.sigbus.info/compilerbook/Dockerfile
+```
+
+cd to cloned dir then run following.
+
+```
+docker run --rm -v $PWD:/9ccs -w /9ccs compilerbook make test
+```
