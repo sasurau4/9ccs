@@ -219,3 +219,15 @@ Remember `foo(2 - 1);`. Arg is not `primary`, it's `expr`. If arg is `primary`, 
 error_at function broken at e9434af401b6b9841eeb2110525c79ea898fee7c.
 
 It cause infinite loop when error_at calling because token->str doesn't have all entire string after token but only token str.
+
+## Mac
+
+```
+docker build -t compilerbook https://www.sigbus.info/compilerbook/Dockerfile
+```
+
+cd to cloned dir then run following.
+
+```
+docker run --rm -v $PWD:/9ccs -w /9ccs compilerbook make test
+```
