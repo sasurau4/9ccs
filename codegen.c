@@ -40,14 +40,16 @@ char *gen_arg_reg_name(int i) {
 }
 
 void gen_lval(Node *node) {
-    if (node->kind != ND_LVAR) {
-        error("Left value of assignment is not variable");
+    if (node->kind == ND_LVAR) {
+        printf("    mov rax, rbp\n");
+        printf("    sub rax, %d\n", node->offset);
+        printf("    push rax\n");
+        return;
+    } else if (node->kind == ND_DEREF) {
+        gen(node->lhs);
+        return;
     }
-
-    printf("    mov rax, rbp\n");
-    printf("    sub rax, %d\n", node->offset);
-    printf("    push rax\n");
-
+    error("Left value of assignment is not variable, actual: %i\n", node->kind);
 }
 
 void gen_func(Function *func) {

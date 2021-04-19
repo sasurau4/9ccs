@@ -58,6 +58,13 @@ typedef enum {
     ND_DEREF, // 19
 } NodeKind;
 
+typedef struct Type Type;
+
+struct Type {
+    enum { INT, PTR } ty;
+    struct Type *ptr_to;
+};
+
 typedef struct {
     void **data;
     int capacity;
@@ -92,6 +99,7 @@ struct Node {
     Node *rhs;
 
     char *name;
+    Type *type; // LVar
 
     Vector *stmts; // Compound statement
     Vector *args; // Function call
@@ -115,6 +123,7 @@ struct LVar {
     char *name; // The name of var
     int len; // The length of var name
     int offset; // Offset from RBP
+    Type *type;
 };
 
 typedef struct {

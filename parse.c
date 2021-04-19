@@ -293,11 +293,12 @@ Node *new_node_num(int val) {
     return node;
 }
 
-LVar *new_lvar(Token *tok) {
+LVar *new_lvar(Token *tok, Type *type) {
     LVar *lvar = calloc(1, sizeof(LVar));
     lvar->name = tok->str;
     lvar->len = tok->len;
     lvar->offset = (lvars->len + 1) * 8;
+    lvar->type = type;
     return lvar;
 }
 
@@ -344,14 +345,23 @@ Node *primary() {
     }
 
     if (consume(KW_INT)) {
+        Type *type = calloc(1, sizeof(Type));
+        type->ty = INT;
+        while(consume("*")) {
+            Type *ptr_typ = calloc(1, sizeof(Type));
+            ptr_typ->ty = PTR;
+            ptr_typ->ptr_to = type;
+            type = ptr_typ;
+        }
         Token *tok = consume_ident();
         if(!tok) {
             error_at(token, "Expect ident.");
         }
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
-        LVar *lvar = new_lvar(tok);
+        LVar *lvar = new_lvar(tok, type);
         node->offset = lvar->offset;
+        node->type = lvar->type;
         vec_push(lvars, lvar);
         return node;
     }
@@ -374,18 +384,18 @@ Node *mul() {
 }
 
 Node *unary() {
-    if (consume("+")) {
-        return primary();
-    } else if (consume("-")) {
-        return new_node(ND_SUB, new_node_num(0), primary());
-    } else if (consume("&")) {
+    if (consume("&")) {
         return new_node(ND_ADDR, unary(), NULL);
     } else if (consume("*")) {
         return new_node(ND_DEREF, unary(), NULL);
     }
 
+    if (consume("+")) {
+        return primary();
+    } else if (consume("-")) {
+        return new_node(ND_SUB, new_node_num(0), primary());
+    } 
     return primary();
-
 }
 
 Node *add() {
