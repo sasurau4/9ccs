@@ -15,6 +15,7 @@ assert() {
         exit 1
     fi
 }
+# exit
 assert 0 'int main() { return 0; }'
 assert 42 "int main() { return 42; }"
 assert 25 "int main() { return 5+20; }"
@@ -177,6 +178,12 @@ int main() {
     y = &x;
     *y = 3;
     return x;
+}
+"
+assert 6 "
+int main() {
+    int *p = alloc1(3, 6);
+    return *(p + 1);
 }
 "
 echo OK

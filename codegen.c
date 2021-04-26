@@ -12,6 +12,14 @@ void error(char *fmt, ...) {
     exit(1);
 }
 
+int size_of(Type *ty) {
+    if (ty->ty == INT) {
+        return 4;
+    }
+    assert(ty->ty == PTR);
+    return 8;
+}
+
 // TODO: refactor to Map
 char *gen_arg_reg_name(int i) {
     switch(i) {
@@ -207,10 +215,24 @@ void gen(Node *node) {
 
     switch (node->kind) {
         case ND_ADD: {
+            if (node->lhs->type->ty == PTR) {
+                printf("    push rax\n");
+                printf("    push %d\n", size_of(node->lhs->type->ptr_to));
+                printf("    pop rax\n");
+                printf("    imul rdi, rax\n");
+                printf("    pop rax\n");
+            } 
             printf("    add rax, rdi\n");
             break;
         }
         case ND_SUB: {
+            if (node->lhs->type->ty == PTR) {
+                printf("    push rax\n");
+                printf("    push %d\n", size_of(node->lhs->type->ptr_to));
+                printf("    pop rax\n");
+                printf("    imul rdi, rax\n");
+                printf("    pop rax\n");
+            } 
             printf("    sub rax, rdi\n");
             break;
         }

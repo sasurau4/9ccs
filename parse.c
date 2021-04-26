@@ -1,5 +1,7 @@
 #include "9ccs.h"
 
+static Type int_ty = {INT, NULL};
+
 void error_at(Token *token, char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
@@ -290,6 +292,8 @@ Node *new_node_num(int val) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_NUM;
     node->val = val;
+
+    node->type = &int_ty;
     return node;
 }
 
@@ -300,6 +304,12 @@ LVar *new_lvar(Token *tok, Type *type) {
     lvar->offset = (lvars->len + 1) * 8;
     lvar->type = type;
     return lvar;
+}
+
+void swap(Node **p, Node **q) {
+    Node *r = *p;
+    *p = *q;
+    *q = r;
 }
 
 Node *primary() {
@@ -316,6 +326,7 @@ Node *primary() {
             node->kind = ND_CALL;
             node->name = tok->str;
             node->args = new_vec();
+            node->type = &int_ty;
             for(;;) {
                 if (consume(")")) {
                     return node;
@@ -338,6 +349,7 @@ Node *primary() {
         LVar *lvar = find_lvar(tok);
         if (lvar) {
             node->offset = lvar->offset;
+            node->type = lvar->type;
         } else {
             error_at(tok, "Local variable not defined.");
         }
@@ -375,8 +387,10 @@ Node *mul() {
     for(;;) {
         if (consume("*")) {
             node = new_node(ND_MUL, node, unary());
+            node->type = node->lhs->type;
         } else if (consume("/")) {
             node = new_node(ND_DIV, node, unary());
+            node->type = node->lhs->type;
         } else {
             return node;
         }
@@ -385,15 +399,21 @@ Node *mul() {
 
 Node *unary() {
     if (consume("&")) {
-        return new_node(ND_ADDR, unary(), NULL);
+        Node *node = new_node(ND_ADDR, unary(), NULL);
+        node->type = node->lhs->type;
+        return node;
     } else if (consume("*")) {
-        return new_node(ND_DEREF, unary(), NULL);
+        Node *node = new_node(ND_DEREF, unary(), NULL);
+        node->type = node->lhs->type;
+        return node;
     }
 
     if (consume("+")) {
         return primary();
     } else if (consume("-")) {
-        return new_node(ND_SUB, new_node_num(0), primary());
+        Node *node = new_node(ND_SUB, new_node_num(0), primary());
+        node->type = node->lhs->type;
+        return node;
     } 
     return primary();
 }
@@ -404,8 +424,17 @@ Node *add() {
     for (;;) {
         if (consume("+")) {
             node = new_node(ND_ADD, node, mul());
+            if (node->rhs->type->ty == PTR) {
+                swap(&node->rhs, &node->lhs);
+                assert(node->lhs->type->ty == PTR);
+            }
+            node->type = node->lhs->type;
         } else if(consume("-")) {
             node = new_node(ND_SUB, node, mul());
+            // if (node->rhs->type->ty == PTR) {
+            //     error_at(token, "rhs cannot be PTR");
+            // }
+            node->type = node->lhs->type;
         } else {
             return node;
         }
