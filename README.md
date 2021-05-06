@@ -230,6 +230,32 @@ This is difficult and learn a lot from `https://github.com/rui314/9cc/commit/19a
 
 *** stack smashing detected *** means overflow. This is caused by `int arr[2]; arr[3] = 1;`
 
+## Implement variable definition
+
+When I variable definition, I mistook that variable definition is treated same as variable use (ND_VAR).
+
+I noticed this because the deref code is not work well and debug the assembly step by step.
+
+Exmple.
+
+```
+int main() {
+    int *p;
+    alloc1(&p, 3, 6);
+    return *(p + 1); // -> 6 😊
+}
+```
+
+```
+int main() {
+    int *p;
+    alloc1(&p, 3, 6);
+    int q;
+    q = *(p + 1);
+    return q; // -> 0 🤔
+}
+```
+
 ## Mac
 
 ```
