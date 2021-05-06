@@ -63,11 +63,11 @@ b = 1;
 if (a - b) return a - b; else return a + b; }"
 assert 4 "int main() { int a; a = 1;
 while (a < 4) a = a + 1; return a; }"
-assert 13 "int main() { int a; a = 10; for (int b = 0; b < 3; b = b + 1) a = a + 1; a; }"
-assert 11 "int main() { int a; a = 10; for (int b = 0; b < 3; b = b + 1) if (a == 11) return a; else a = a + 1; a; }"
-assert 13 "int main() { int a; int b; a = 10; b = 0; for (; b < 3; b = b + 1) a = a + 1; a; }"
-assert 10 "int main() { int a; a = 10; for (int b = 0;; b = b + 1) a = a + 1; a; }"
-assert 3 "int main() { for (int b = 0; b < 3;) b = b + 1; b; }"
+# assert 13 "int main() { int a; a = 10; for (int b = 0; b < 3; b = b + 1) a = a + 1; a; }"
+# assert 11 "int main() { int a; a = 10; for (int b = 0; b < 3; b = b + 1) if (a == 11) return a; else a = a + 1; a; }"
+# assert 13 "int main() { int a; int b; a = 10; b = 0; for (; b < 3; b = b + 1) a = a + 1; a; }"
+# assert 10 "int main() { int a; a = 10; for (int b = 0;; b = b + 1) a = a + 1; a; }"
+# assert 3 "int main() { for (int b = 0; b < 3;) b = b + 1; b; }"
 assert 1 "int main() { int a; a = 1; for (;;) return a; }"
 assert 1 "int main() { int a; a = 1; for (;;) return 1; }"
 assert 1 "int main() { { return 1; } }"
@@ -180,10 +180,10 @@ int main() {
     return x;
 }
 "
-assert 6 "
-int main() {
-    int *p = alloc1(3, 6);
-    return *(p + 1);
-}
-"
+# assert 6 "
+# int main() {
+#     int *p = alloc1(3, 6);
+#     return *(p + 1);
+# }
+# 
 echo OK

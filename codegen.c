@@ -205,6 +205,9 @@ void gen(Node *node) {
             printf("    push rax\n");
             return;
         }
+        case ND_VARDEF: {
+            return;
+        }
     }
 
     gen(node->lhs);
@@ -217,8 +220,7 @@ void gen(Node *node) {
         case ND_ADD: {
             if (node->lhs->type->ty == PTR) {
                 printf("    push rax\n");
-                printf("    push %d\n", size_of(node->lhs->type->ptr_to));
-                printf("    pop rax\n");
+                printf("    mov rax, %d\n", size_of(node->lhs->type->ptr_to));
                 printf("    imul rdi, rax\n");
                 printf("    pop rax\n");
             } 
@@ -228,8 +230,7 @@ void gen(Node *node) {
         case ND_SUB: {
             if (node->lhs->type->ty == PTR) {
                 printf("    push rax\n");
-                printf("    push %d\n", size_of(node->lhs->type->ptr_to));
-                printf("    pop rax\n");
+                printf("    mov rax, %d\n", size_of(node->lhs->type->ptr_to));
                 printf("    imul rdi, rax\n");
                 printf("    pop rax\n");
             } 

@@ -306,6 +306,28 @@ LVar *new_lvar(Token *tok, Type *type) {
     return lvar;
 }
 
+Node *new_vardef() {
+    Type *type = calloc(1, sizeof(Type));
+    type->ty = INT;
+    while(consume("*")) {
+        Type *ptr_typ = calloc(1, sizeof(Type));
+        ptr_typ->ty = PTR;
+        ptr_typ->ptr_to = type;
+        type = ptr_typ;
+    }
+    Token *tok = consume_ident();
+    if(!tok) {
+        error_at(token, "Expect ident.");
+    }
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = ND_VARDEF;
+    LVar *lvar = new_lvar(tok, type);
+    node->offset = lvar->offset;
+    node->type = lvar->type;
+    vec_push(lvars, lvar);
+    return node;
+}
+
 void swap(Node **p, Node **q) {
     Node *r = *p;
     *p = *q;
@@ -357,24 +379,7 @@ Node *primary() {
     }
 
     if (consume(KW_INT)) {
-        Type *type = calloc(1, sizeof(Type));
-        type->ty = INT;
-        while(consume("*")) {
-            Type *ptr_typ = calloc(1, sizeof(Type));
-            ptr_typ->ty = PTR;
-            ptr_typ->ptr_to = type;
-            type = ptr_typ;
-        }
-        Token *tok = consume_ident();
-        if(!tok) {
-            error_at(token, "Expect ident.");
-        }
-        Node *node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR;
-        LVar *lvar = new_lvar(tok, type);
-        node->offset = lvar->offset;
-        node->type = lvar->type;
-        vec_push(lvars, lvar);
+        Node *node = new_vardef();
         return node;
     }
 
@@ -536,6 +541,9 @@ Node *stmt() {
             vec_push(stmts, stmt());
         }
         node->stmts = stmts;
+    } else if (consume(KW_INT)) {
+        node = new_vardef();
+        expect(";");
     } else {
         node = expr();
         expect(";");
@@ -572,7 +580,7 @@ Program *parse() {
         node->name = tok->str;
         expect("(");
         while(!consume(")")) {
-            Node *param = expr();
+            Node *param = primary();
             vec_push(params, param);
             consume(",");
         }
