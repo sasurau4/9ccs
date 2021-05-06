@@ -220,6 +220,16 @@ error_at function broken at e9434af401b6b9841eeb2110525c79ea898fee7c.
 
 It cause infinite loop when error_at calling because token->str doesn't have all entire string after token but only token str.
 
+## Implement pointer + number or pointer - number
+
+This is difficult and learn a lot from `https://github.com/rui314/9cc/commit/19ab268effbc7d5439545589373e7cf7fd7305ac`
+
+- You need ty in almost every node
+- If you want to allocate value in linear without array, you use array in test_func (this compiled by gcc). 
+- Because array is pointer, you need `int **p` to handle it as function arg
+
+*** stack smashing detected *** means overflow. This is caused by `int arr[2]; arr[3] = 1;`
+
 ## Mac
 
 ```
