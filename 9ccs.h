@@ -56,7 +56,7 @@ typedef enum {
     ND_FUNC, // 17
     ND_ADDR, // 18
     ND_DEREF, // 19
-    ND_VARDEF, // 20
+    ND_VARDEF, // 20 but not used
 } NodeKind;
 
 typedef struct Type Type;

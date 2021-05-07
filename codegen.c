@@ -48,7 +48,7 @@ char *gen_arg_reg_name(int i) {
 }
 
 void gen_lval(Node *node) {
-    if (node->kind == ND_LVAR) {
+    if (node->kind == ND_LVAR || node->kind == ND_VARDEF) {
         printf("    mov rax, rbp\n");
         printf("    sub rax, %d\n", node->offset);
         printf("    push rax\n");
@@ -206,6 +206,7 @@ void gen(Node *node) {
             return;
         }
         case ND_VARDEF: {
+            // no op
             return;
         }
     }

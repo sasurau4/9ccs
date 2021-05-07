@@ -306,7 +306,7 @@ LVar *new_lvar(Token *tok, Type *type) {
     return lvar;
 }
 
-Node *new_vardef() {
+void add_new_lvar() {
     Type *type = calloc(1, sizeof(Type));
     type->ty = INT;
     while(consume("*")) {
@@ -315,17 +315,12 @@ Node *new_vardef() {
         ptr_typ->ptr_to = type;
         type = ptr_typ;
     }
-    Token *tok = consume_ident();
-    if(!tok) {
+    if(token->kind != TK_IDENT) {
         error_at(token, "Expect ident.");
     }
-    Node *node = calloc(1, sizeof(Node));
-    node->kind = ND_VARDEF;
-    LVar *lvar = new_lvar(tok, type);
-    node->offset = lvar->offset;
-    node->type = lvar->type;
+    LVar *lvar = new_lvar(token, type);
     vec_push(lvars, lvar);
-    return node;
+    return;
 }
 
 void swap(Node **p, Node **q) {
@@ -339,6 +334,12 @@ Node *primary() {
         Node *node = expr();
         expect(")");
         return node;
+    }
+
+    // Handle var definition
+    // This emit no AST node
+    if (consume(KW_INT)) {
+        add_new_lvar();
     }
 
     Token *tok = consume_ident();
@@ -375,11 +376,6 @@ Node *primary() {
         } else {
             error_at(tok, "Local variable not defined.");
         }
-        return node;
-    }
-
-    if (consume(KW_INT)) {
-        Node *node = new_vardef();
         return node;
     }
 
@@ -541,9 +537,6 @@ Node *stmt() {
             vec_push(stmts, stmt());
         }
         node->stmts = stmts;
-    } else if (consume(KW_INT)) {
-        node = new_vardef();
-        expect(";");
     } else {
         node = expr();
         expect(";");
