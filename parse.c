@@ -401,11 +401,14 @@ Node *mul() {
 Node *unary() {
     if (consume("&")) {
         Node *node = new_node(ND_ADDR, unary(), NULL);
-        node->type = node->lhs->type;
+        Type *type = calloc(1, sizeof(Type));
+        type->ty = PTR;
+        type->ptr_to = node->lhs->type;
+        node->type = type;
         return node;
     } else if (consume("*")) {
         Node *node = new_node(ND_DEREF, unary(), NULL);
-        node->type = node->lhs->type;
+        node->type = node->lhs->type->ptr_to;
         return node;
     }
 

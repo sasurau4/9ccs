@@ -181,6 +181,14 @@ int main() {
     return x;
 }
 "
+assert 33 "
+int main() {
+    int *p;
+    int q;
+    allocp(&p, 30, 31);
+    q = *p + 3;
+    return q;
+}"
 # assert 6 "
 # int main() {
 #     int *p = alloc1(3, 6);
