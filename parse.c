@@ -53,6 +53,25 @@ bool consume(char *op) {
     return true;
 }
 
+bool check_token(Token *t, char *op) {
+    switch (t->kind) {
+        case TK_IDENT:
+        case TK_NUM:
+        case TK_EOF: {
+            return false;
+        }
+        default: {
+            // Do nothing
+        }
+    }
+
+    if (strlen(op) != t->len || 
+        memcmp(t->str, op, t->len)) {
+        return false;
+    }
+    return true;
+}
+
 Token *consume_ident() {
     if (token->kind != TK_IDENT) {
         return 0;
@@ -72,7 +91,7 @@ void expect(char *op) {
         strlen(op) != token->len || 
         memcmp(token->str, op, token->len)) {
         char *err;
-        sprintf(err, "Expect keyword: %s.", op);
+        sprintf(err, "Expect keyword: %s", op);
         error_at(token, err);
     }
     token = token->next;
@@ -336,12 +355,6 @@ Node *primary() {
         return node;
     }
 
-    // Handle var definition
-    // This emit no AST node
-    if (consume(KW_INT)) {
-        add_new_lvar();
-    }
-
     Token *tok = consume_ident();
     if (tok) {
         if (consume("(")) {
@@ -487,6 +500,21 @@ Node *assign() {
 }
 
 Node *expr() {
+    // Handle var definition
+    if (consume(KW_INT)) {
+        add_new_lvar();
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_VARDEF;
+        // Handle definition has initializer
+        if (check_token(token->next, "=")) {
+            node->init = assign();
+        } else {
+            // If definition doesn't have initilizer, consume ident
+            consume_ident();
+        }
+        return node;
+    }
+
     return assign();
 }
 
@@ -576,6 +604,8 @@ Program *parse() {
         node->name = tok->str;
         expect("(");
         while(!consume(")")) {
+            expect(KW_INT);
+            add_new_lvar();
             Node *param = primary();
             vec_push(params, param);
             consume(",");

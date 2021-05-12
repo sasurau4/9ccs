@@ -168,7 +168,7 @@ int main() {
     int z;
     x = 3;
     y = 5;
-    z = &y + 8;
+    z = &y + 2;
     return *z;
 }
 "
@@ -185,13 +185,29 @@ assert 33 "
 int main() {
     int *p;
     int q;
-    allocp(&p, 30, 31);
+    allocp2(&p, 30, 31);
     q = *p + 3;
     return q;
 }"
-# assert 6 "
-# int main() {
-#     int *p = alloc1(3, 6);
-#     return *(p + 1);
-# }"
+assert 6 "
+int main() {
+    int *p = alloc1(3, 6);
+    return *(p + 1);
+}"
+assert 31 "
+int main() {
+    int *p;
+    allocp2(&p, 30, 31);
+    int *q;
+    q = p + 1;
+    return *q;
+}"
+assert 8 "
+int main() {
+    int *p;
+    allocp4(&p, 1, 2, 4, 8);
+    int *q;
+    q = p + 3;
+    return *q;
+}"
 echo OK

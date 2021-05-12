@@ -206,7 +206,9 @@ void gen(Node *node) {
             return;
         }
         case ND_VARDEF: {
-            // no op
+            if (node->init) {
+                gen(node->init);
+            }
             return;
         }
     }
