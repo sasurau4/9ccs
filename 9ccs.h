@@ -17,6 +17,7 @@ typedef enum {
     TK_WHILE,
     TK_FOR,
     TK_INT,
+    TK_SIZEOF,
     TK_IDENT,
     TK_NUM,
     TK_EOF,
@@ -85,12 +86,16 @@ typedef struct {
     Vector *vals;
 } Map;
 
+/**
+ * util
+ * */
 Map *new_map(void);
 void map_put(Map *map, char *key, void *val);
 void map_puti(Map *map, char *key, int val);
 void *map_get(Map *map, char *key);
 int map_geti(Map *map, char *key, int default_);
 bool map_exists(Map *map, char *key);
+int size_of(Type *ty);
 
 typedef struct Node Node;
 

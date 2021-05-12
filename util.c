@@ -46,3 +46,11 @@ bool vec_union1(Vector *v, void *elem) {
     vec_push(v, elem);
     return true;
 }
+
+int size_of(Type *ty) {
+    if (ty->ty == INT) {
+        return 4;
+    }
+    assert(ty->ty == PTR);
+    return 8;
+}

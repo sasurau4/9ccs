@@ -29,6 +29,7 @@ char *KW_ELSE = "else";
 char *KW_WHILE = "while"; 
 char *KW_FOR = "for";
 char *KW_INT = "int";
+char *KW_SIZEOF = "sizeof";
 
 /**
  * Tokenizer
@@ -263,6 +264,14 @@ Token *tokenize(char *p) {
             continue;
         }
 
+        if (is_reserved_keyword(p, KW_SIZEOF)) {
+            int keylen = strlen(KW_SIZEOF);
+            cur = new_token(TK_SIZEOF, cur, p, keylen, ln, col);
+            p += keylen;
+            col += keylen;
+            continue;
+        }
+
         if (isdigit(*p)) {
             cur = new_token(TK_NUM, cur, p, 0, ln, col);
             cur->val = strtol(p, &p, 10);
@@ -425,6 +434,10 @@ Node *unary() {
         return node;
     }
 
+    if (consume(KW_SIZEOF)) {
+        Node *node = unary();
+        return new_node_num(size_of(node->type));
+    }
     if (consume("+")) {
         return primary();
     } else if (consume("-")) {

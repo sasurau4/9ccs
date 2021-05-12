@@ -12,14 +12,6 @@ void error(char *fmt, ...) {
     exit(1);
 }
 
-int size_of(Type *ty) {
-    if (ty->ty == INT) {
-        return 4;
-    }
-    assert(ty->ty == PTR);
-    return 8;
-}
-
 // TODO: refactor to Map
 char *gen_arg_reg_name(int i) {
     switch(i) {
