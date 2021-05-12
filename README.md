@@ -256,6 +256,12 @@ int main() {
 }
 ```
 
+## Stack and heap
+
+Without `static` keyword in C lang, I fell into the pit holl about the difference between stack and heap.
+
+See [my blog post in Japanese](https://sasurau4.hatenablog.com/entry/2021/05/12/120542)
+
 ## Mac
 
 ```
