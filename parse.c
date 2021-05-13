@@ -1,6 +1,6 @@
 #include "9ccs.h"
 
-static Type int_ty = {INT, NULL};
+static Type int_ty = {INT, NULL, 1};
 
 void error_at(Token *token, char *fmt, ...) {
     va_list ap;
@@ -206,6 +206,8 @@ Token *tokenize(char *p) {
             case ';': 
             case ',': 
             case '&': 
+            case '[': 
+            case ']': 
             case '{': 
             case '}': {
                 cur = new_token(TK_RESERVED, cur, p++, 1, ln, col++);
@@ -329,22 +331,37 @@ LVar *new_lvar(Token *tok, Type *type) {
     LVar *lvar = calloc(1, sizeof(LVar));
     lvar->name = tok->str;
     lvar->len = tok->len;
-    lvar->offset = (lvars->len + 1) * 8;
+    int prev_offset = 0;
+    if (lvars->len > 0) {
+        LVar *last_lvar = vec_last(lvars);
+        prev_offset = last_lvar->offset;
+    }
+    if (type->ty == ARRAY) {
+        lvar->offset = prev_offset + size_of(type->ptr_to) * type->array_size;
+    } else {
+        lvar->offset = prev_offset + 8;
+    }
     lvar->type = type;
     return lvar;
 }
 
 void add_new_lvar() {
-    Type *type = calloc(1, sizeof(Type));
-    type->ty = INT;
-    while(consume("*")) {
+    Type *type = &int_ty;
+    while (consume("*")) {
         Type *ptr_typ = calloc(1, sizeof(Type));
         ptr_typ->ty = PTR;
         ptr_typ->ptr_to = type;
         type = ptr_typ;
     }
-    if(token->kind != TK_IDENT) {
+    if (token->kind != TK_IDENT) {
         error_at(token, "Expect ident.");
+    }
+    if (check_token(token->next, "[")) {
+        Type *array_type = calloc(1, sizeof(Type));
+        array_type->array_size = token->next->next->val;
+        array_type->ty = ARRAY;
+        array_type->ptr_to = type;
+        type = array_type;
     }
     LVar *lvar = new_lvar(token, type);
     vec_push(lvars, lvar);
@@ -524,6 +541,11 @@ Node *expr() {
         } else {
             // If definition doesn't have initilizer, consume ident
             consume_ident();
+            // TODO: Implement array def with initializer
+            if (consume("[")) {
+                expect_number();
+                expect("]");
+            }
         }
         return node;
     }

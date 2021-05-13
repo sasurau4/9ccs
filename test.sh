@@ -248,4 +248,9 @@ assert 4 "
 int main() {
     return sizeof(sizeof(1));
 }"
+assert 0 "
+int main() {
+    int a[2];
+    return 0;
+}"
 echo OK

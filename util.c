@@ -27,7 +27,7 @@ void *vec_pop(Vector *v) {
 
 void *vec_last(Vector *v) {
     assert(v->len);
-    return v->data[v->len -1];
+    return v->data[v->len - 1];
 }
 
 bool vec_contains(Vector *v, void *elem) {

@@ -61,7 +61,11 @@ void gen_func(Function *func) {
     printf("    push rbp\n");
     printf("    mov rbp, rsp\n");
     // A variable space is fixed of 8
-    printf("    sub rsp, %d\n", func->lvars->len * 8);
+    // printf("    sub rsp, %d\n", func->lvars->len * 8);
+    if (func->lvars->len > 0) {
+        LVar *last_lvar = vec_last(func->lvars);
+        printf("    sub rsp, %d\n", last_lvar->offset);
+    }
 
     // Gen params
     for(int i = 0; i < func->node->params->len; i++) {
