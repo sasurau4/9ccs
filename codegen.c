@@ -60,8 +60,6 @@ void gen_func(Function *func) {
     // Acquire space for variables
     printf("    push rbp\n");
     printf("    mov rbp, rsp\n");
-    // A variable space is fixed of 8
-    // printf("    sub rsp, %d\n", func->lvars->len * 8);
     if (func->lvars->len > 0) {
         LVar *last_lvar = vec_last(func->lvars);
         printf("    sub rsp, %d\n", last_lvar->offset);
@@ -95,9 +93,11 @@ void gen(Node *node) {
         }
         case ND_LVAR: {
             gen_lval(node);
-            printf("    pop rax\n");
-            printf("    mov rax, [rax]\n");
-            printf("    push rax\n");
+            if (node->type->ty != ARRAY) {
+                printf("    pop rax\n");
+                printf("    mov rax, [rax]\n");
+                printf("    push rax\n");
+            }
             return;
         }
         case ND_ASSIGN: {
@@ -217,7 +217,7 @@ void gen(Node *node) {
 
     switch (node->kind) {
         case ND_ADD: {
-            if (node->lhs->type->ty == PTR) {
+            if (node->lhs->type->ty == PTR || node->lhs->type->ty == ARRAY) {
                 printf("    push rax\n");
                 printf("    mov rax, %d\n", size_of(node->lhs->type->ptr_to));
                 printf("    imul rdi, rax\n");
@@ -227,7 +227,7 @@ void gen(Node *node) {
             break;
         }
         case ND_SUB: {
-            if (node->lhs->type->ty == PTR) {
+            if (node->lhs->type->ty == PTR || node->lhs->type->ty == ARRAY) {
                 printf("    push rax\n");
                 printf("    mov rax, %d\n", size_of(node->lhs->type->ptr_to));
                 printf("    imul rdi, rax\n");

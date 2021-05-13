@@ -253,4 +253,29 @@ int main() {
     int a[2];
     return 0;
 }"
+assert 2 "
+int main() {
+    int a[1];
+    *a = 2;
+    return *a;
+}
+"
+assert 3 "
+int main() {
+    int a[2];
+    *a = 2;
+    *(a + 1) = 3;
+    return *(a + 1);
+}
+"
+assert 5 "
+int main() {
+    int a[2];
+    *a = 2;
+    *(a + 1) = 3;
+    int *p;
+    p = a;
+    return *p + *(p + 1);
+}
+"
 echo OK
