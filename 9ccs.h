@@ -136,11 +136,11 @@ struct LVar {
 typedef struct {
     char *name;
     Node *node;
-    Vector *lvars;
+    Map *lvars;
 } Function;
 
 typedef struct {
-    Vector *funcs;
+    Map *funcs;
 } Program;
 
 /**
@@ -169,5 +169,6 @@ void gen_func(Function *func);
  * */
 extern Token *token;
 extern char *user_input;
-extern Vector *lvars;
-extern Vector *funcs;
+extern Map *lvars;
+extern Map *gvars;
+extern Map *funcs;

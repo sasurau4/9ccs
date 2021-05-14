@@ -142,25 +142,11 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len, int ln, int col
 }
 
 LVar *find_lvar(Token *tok) {
-    for (int i = 0; i < lvars->len; i++) {
-        LVar *var;
-        var = lvars->data[i];
-        if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)) {
-            return var;
-        }
-    }
-    return NULL;
+    return map_get(lvars, tok->str);
 }
 
 Function *find_func(Token *tok) {
-    for (int i = 0; i < funcs->len; i++) {
-        Function *func;
-        func = funcs->data[i];
-        if(!memcmp(tok->str, func->name, tok->len)) {
-            return func;
-        }
-    }
-    return NULL;
+    return map_get(funcs, tok->str);
 }
 
 Token *tokenize(char *p) {
@@ -367,8 +353,8 @@ LVar *new_lvar(Token *tok, Type *type) {
     lvar->name = tok->str;
     lvar->len = tok->len;
     int prev_offset = 0;
-    if (lvars->len > 0) {
-        LVar *last_lvar = vec_last(lvars);
+    if (lvars->keys->len > 0) {
+        LVar *last_lvar = vec_last(lvars->vals);
         prev_offset = last_lvar->offset;
     }
     if (type->ty == ARRAY) {
@@ -399,7 +385,7 @@ void add_new_lvar() {
         type = array_type;
     }
     LVar *lvar = new_lvar(token, type);
-    vec_push(lvars, lvar);
+    map_put(lvars, lvar->name, lvar);
     return;
 }
 
@@ -642,17 +628,17 @@ Node *stmt() {
 Program *parse() {
     Program *program;
     program = calloc(1, sizeof(Program));
-    funcs = new_vec();
+    funcs = new_map();
 
     while(!at_eof()) {
         Node *node;
         Vector *params;
 
         Function *func;
-        // From global var
-        lvars = new_vec();
-        // From local var
         func = calloc(1, sizeof(Function));
+
+        // LVars in func
+        lvars = new_map();
 
         node = calloc(1, sizeof(Node));
         params = new_vec();
@@ -677,7 +663,7 @@ Program *parse() {
         node->params = params;
         func->lvars = lvars;
         func->node = node;
-        vec_push(funcs, func);
+        map_put(funcs, func->name, func);
     }
 
     program->funcs = funcs;
