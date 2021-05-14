@@ -61,7 +61,7 @@ void gen_func(Function *func) {
     printf("    push rbp\n");
     printf("    mov rbp, rsp\n");
     if (func->lvars->keys->len > 0) {
-        LVar *last_lvar = vec_last(func->lvars->vals);
+        Var *last_lvar = vec_last(func->lvars->vals);
         printf("    sub rsp, %d\n", last_lvar->offset);
     }
 

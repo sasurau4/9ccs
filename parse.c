@@ -168,7 +168,7 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len, int ln, int col
     return tok;
 }
 
-LVar *find_lvar(Token *tok) {
+Var *find_lvar(Token *tok) {
     return map_get(lvars, tok->str);
 }
 
@@ -358,7 +358,7 @@ Node *new_node_lvar(Token *tok) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_LVAR;
 
-    LVar *lvar = find_lvar(tok);
+    Var *lvar = find_lvar(tok);
     if (lvar) {
         node->offset = lvar->offset;
         node->type = lvar->type;
@@ -376,13 +376,13 @@ Node *new_node_array_index_access(Node *lhs, Node *rhs) {
 }
 
 // TODO merge to new_var
-LVar *new_lvar(Token *tok, Type *type) {
-    LVar *lvar = calloc(1, sizeof(LVar));
+Var *new_lvar(Token *tok, Type *type) {
+    Var *lvar = calloc(1, sizeof(Var));
     lvar->name = tok->str;
     lvar->len = tok->len;
     int prev_offset = 0;
     if (lvars->keys->len > 0) {
-        LVar *last_lvar = vec_last(lvars->vals);
+        Var *last_lvar = vec_last(lvars->vals);
         prev_offset = last_lvar->offset;
     }
     if (type->ty == ARRAY) {
@@ -395,8 +395,8 @@ LVar *new_lvar(Token *tok, Type *type) {
     return lvar;
 }
 
-LVar *new_var(Token *tok, Type *type, bool is_local) {
-    LVar *var = calloc(1, sizeof(LVar));
+Var *new_var(Token *tok, Type *type, bool is_local) {
+    Var *var = calloc(1, sizeof(Var));
     var->name = tok->str;
     var->len = tok->len;
     var->type = type;
@@ -423,7 +423,7 @@ void add_new_lvar() {
         array_type->ptr_to = type;
         type = array_type;
     }
-    LVar *lvar = new_lvar(token, type);
+    Var *lvar = new_lvar(token, type);
     map_put(lvars, lvar->name, lvar);
     return;
 }
@@ -706,7 +706,7 @@ Program *parse() {
             func->node = node;
             map_put(funcs, func->name, func);
         } else {
-            LVar *gvar = new_var(tok, ty, false);
+            Var *gvar = new_var(tok, ty, false);
             map_put(gvars, gvar->name, gvar);
             // TODO: Implement array def with initializer
             if (consume("[")) {

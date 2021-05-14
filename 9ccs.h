@@ -125,10 +125,9 @@ struct Node {
     int offset; // If kind is ND_LVAR, this hold offset from RBP
 };
 
-typedef struct LVar LVar;
+typedef struct Var Var;
 
-// TODO rename Var
-struct LVar {
+struct Var {
     char *name; // The name of var
     int len; // The length of var name
     int offset; // Offset from RBP
