@@ -307,6 +307,19 @@ Token *tokenize(char *p) {
  * Parser
  * */
 
+void swap(Node **p, Node **q) {
+    Node *r = *p;
+    *p = *q;
+    *q = r;
+}
+
+void make_node_lhs_ptr(Node *node) {
+    if (node->rhs->type->ty == PTR || node->rhs->type->ty == ARRAY) {
+        swap(&node->rhs, &node->lhs);
+        assert(node->lhs->type->ty == PTR || node->lhs->type->ty == ARRAY);
+    }
+}
+
 /**
  * function implementation
  * */
@@ -315,6 +328,7 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
     node->kind = kind;
     node->lhs = lhs;
     node->rhs = rhs;
+    node->type = lhs->type;
     return node;
 }
 
@@ -325,6 +339,27 @@ Node *new_node_num(int val) {
 
     node->type = &int_ty;
     return node;
+}
+
+Node *new_node_lvar(Token *tok) {
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = ND_LVAR;
+
+    LVar *lvar = find_lvar(tok);
+    if (lvar) {
+        node->offset = lvar->offset;
+        node->type = lvar->type;
+    } else {
+        error_at(tok, "Local variable not defined.");
+    }
+    return node;
+}
+
+Node *new_node_array_index_access(Node *lhs, Node *rhs) {
+    Node *array_access_index = new_node(ND_ADD, lhs, rhs);
+    Node *array_access = new_node(ND_DEREF, array_access_index, NULL);
+    array_access->type = array_access->lhs->type->ptr_to;
+    return array_access;
 }
 
 LVar *new_lvar(Token *tok, Type *type) {
@@ -368,12 +403,6 @@ void add_new_lvar() {
     return;
 }
 
-void swap(Node **p, Node **q) {
-    Node *r = *p;
-    *p = *q;
-    *q = r;
-}
-
 Node *primary() {
     if (consume("(")) {
         Node *node = expr();
@@ -405,17 +434,7 @@ Node *primary() {
             }
         }
 
-        Node *node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR;
-
-        LVar *lvar = find_lvar(tok);
-        if (lvar) {
-            node->offset = lvar->offset;
-            node->type = lvar->type;
-        } else {
-            error_at(tok, "Local variable not defined.");
-        }
-        return node;
+        return new_node_lvar(tok);
     }
 
     return new_node_num(expect_number());
@@ -455,14 +474,26 @@ Node *unary() {
         Node *node = unary();
         return new_node_num(size_of(node->type));
     }
+
+    Node *pri = calloc(1, sizeof(Node));
     if (consume("+")) {
-        return primary();
+        pri = primary();
     } else if (consume("-")) {
         Node *node = new_node(ND_SUB, new_node_num(0), primary());
-        node->type = node->lhs->type;
-        return node;
+        pri = node;
+    } else {
+        pri = primary();
     } 
-    return primary();
+
+    if (!consume("[")) {
+        return pri;
+    }
+    // Support array access syntax like "2[a]" and "a[2]"
+    Node *array_index_access_node = calloc(1, sizeof(Node));
+    Node *array_access_index_node = expr();
+    array_index_access_node = new_node_array_index_access(pri, array_access_index_node);
+    expect("]");
+    return array_index_access_node;
 }
 
 Node *add() {
@@ -471,10 +502,7 @@ Node *add() {
     for (;;) {
         if (consume("+")) {
             node = new_node(ND_ADD, node, mul());
-            if (node->rhs->type->ty == PTR) {
-                swap(&node->rhs, &node->lhs);
-                assert(node->lhs->type->ty == PTR);
-            }
+            make_node_lhs_ptr(node);
             node->type = node->lhs->type;
         } else if(consume("-")) {
             node = new_node(ND_SUB, node, mul());

@@ -278,4 +278,56 @@ int main() {
     return *p + *(p + 1);
 }
 "
+assert 4 "
+int main() {
+    int a[3];
+    a[0] = 2;
+    a[1] = 3;
+    a[2] = 4;
+    return a[2];
+}"
+assert 4 "
+int main() {
+    int a[3];
+    a[1 + 1] = 4;
+    return a[2];
+}"
+assert 4 "
+int main() {
+    int a[3];
+    2[a] = 4;
+    return 2[a];
+}
+"
+assert 4 "
+int main() {
+    int a[3];
+    (1+1)[a] = 4;
+    return (1+1)[a];
+}
+"
+assert 4 "
+int main() {
+    int a[3];
+    (1+1)[a] = 4;
+    return (1+1)[a];
+}
+"
+assert 32 "
+int main() {
+    int a[2];
+    a[0] = 11;
+    a[1] = 21;
+    return a[0] + a[1];
+}
+"
+assert 62 "
+int main() {
+    int a[3];
+    a[0] = 11;
+    a[1] = 21;
+    a[2] = 30;
+    return a[0] + a[1] + a[2];
+}
+"
 echo OK
