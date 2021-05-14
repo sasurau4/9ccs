@@ -58,6 +58,7 @@ typedef enum {
     ND_ADDR, // 18
     ND_DEREF, // 19
     ND_VARDEF, // 20
+    ND_GVAR, // 21
 } NodeKind;
 
 typedef struct Type Type;
@@ -126,11 +127,13 @@ struct Node {
 
 typedef struct LVar LVar;
 
+// TODO rename Var
 struct LVar {
     char *name; // The name of var
     int len; // The length of var name
     int offset; // Offset from RBP
     Type *type;
+    bool is_local;
 };
 
 typedef struct {
@@ -141,6 +144,7 @@ typedef struct {
 
 typedef struct {
     Map *funcs;
+    Map *gvars;
 } Program;
 
 /**

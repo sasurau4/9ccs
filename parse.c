@@ -107,6 +107,33 @@ int expect_number() {
     return val;
 }
 
+Type *expect_ty() {
+    Type *type = calloc(1, sizeof(Type));
+    if (consume(KW_INT)) {
+        Type *type = &int_ty;
+    }
+    if (!type) {
+        error_at(token, "Expect type keyword");
+    }
+    while (consume("*")) {
+        Type *ptr_typ = calloc(1, sizeof(Type));
+        ptr_typ->ty = PTR;
+        ptr_typ->ptr_to = type;
+        type = ptr_typ;
+    }
+    if (token->kind != TK_IDENT) {
+        error_at(token, "Expect ident.");
+    }
+    if (check_token(token->next, "[")) {
+        Type *array_type = calloc(1, sizeof(Type));
+        array_type->array_size = token->next->next->val;
+        array_type->ty = ARRAY;
+        array_type->ptr_to = type;
+        type = array_type;
+    }
+    return type;
+}
+
 bool at_eof() {
     return token->kind == TK_EOF;
 }
@@ -348,6 +375,7 @@ Node *new_node_array_index_access(Node *lhs, Node *rhs) {
     return array_access;
 }
 
+// TODO merge to new_var
 LVar *new_lvar(Token *tok, Type *type) {
     LVar *lvar = calloc(1, sizeof(LVar));
     lvar->name = tok->str;
@@ -363,10 +391,21 @@ LVar *new_lvar(Token *tok, Type *type) {
         lvar->offset = prev_offset + 8;
     }
     lvar->type = type;
+    lvar->is_local = true;
     return lvar;
 }
 
+LVar *new_var(Token *tok, Type *type, bool is_local) {
+    LVar *var = calloc(1, sizeof(LVar));
+    var->name = tok->str;
+    var->len = tok->len;
+    var->type = type;
+    var->is_local = is_local;
+    return var;
+}
+
 void add_new_lvar() {
+    // TODO: Refactor to expect_ty
     Type *type = &int_ty;
     while (consume("*")) {
         Type *ptr_typ = calloc(1, sizeof(Type));
@@ -629,6 +668,7 @@ Program *parse() {
     Program *program;
     program = calloc(1, sizeof(Program));
     funcs = new_map();
+    gvars = new_map();
 
     while(!at_eof()) {
         Node *node;
@@ -644,28 +684,40 @@ Program *parse() {
         params = new_vec();
         node->kind = ND_FUNC;
 
-        expect(KW_INT);
+        Type *ty = expect_ty();
         Token *tok = consume_ident();
         if(!tok) {
-            error_at(token, "Top level expect function defs");
+            error_at(token, "Top level expect function or global var def");
         }
-        func->name = tok->str;
-        node->name = tok->str;
-        expect("(");
-        while(!consume(")")) {
-            expect(KW_INT);
-            add_new_lvar();
-            Node *param = primary();
-            vec_push(params, param);
-            consume(",");
+        if (check_token(token, "(")) {
+            func->name = tok->str;
+            node->name = tok->str;
+            expect("(");
+            while(!consume(")")) {
+                expect_ty();
+                add_new_lvar();
+                Node *param = primary();
+                vec_push(params, param);
+                consume(",");
+            }
+            node->body = stmt();
+            node->params = params;
+            func->lvars = lvars;
+            func->node = node;
+            map_put(funcs, func->name, func);
+        } else {
+            LVar *gvar = new_var(tok, ty, false);
+            map_put(gvars, gvar->name, gvar);
+            // TODO: Implement array def with initializer
+            if (consume("[")) {
+                expect_number();
+                expect("]");
+            }
+            expect(";");
         }
-        node->body = stmt();
-        node->params = params;
-        func->lvars = lvars;
-        func->node = node;
-        map_put(funcs, func->name, func);
     }
 
     program->funcs = funcs;
+    program->gvars = gvars;
     return program;
 }

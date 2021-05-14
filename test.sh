@@ -330,4 +330,11 @@ int main() {
     return a[0] + a[1] + a[2];
 }
 "
+assert 0 "
+int *foo;
+int bar[10];
+int *bazz() {}
+int foobar() {}
+int main() { return 0; }
+"
 echo OK

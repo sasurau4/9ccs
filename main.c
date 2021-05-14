@@ -9,6 +9,7 @@ char *user_input;
 Token *token;
 Program *program;
 Map *lvars;
+Map *gvars;
 Map *funcs;
 
 int main(int argc, char **argv) {
