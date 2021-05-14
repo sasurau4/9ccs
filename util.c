@@ -66,7 +66,7 @@ void map_puti(Map *map, char *key, int val) {
 void *map_get(Map *map, char *key) {
     for (int i = map->keys->len - 1; i >= 0; i--) {
         if (!strcmp(map->keys->data[i], key)) {
-            return (intptr_t)map->vals->data[i];
+            return map->vals->data[i];
         }
     }
     return NULL;
