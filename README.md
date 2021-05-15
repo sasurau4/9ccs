@@ -262,6 +262,12 @@ Without `static` keyword in C lang, I fell into the pit holl about the differenc
 
 See [my blog post in Japanese](https://sasurau4.hatenablog.com/entry/2021/05/12/120542)
 
+## Use Assembler Directives for global variable
+
+`.zero` is assembler directive.
+
+See https://docs.oracle.com/cd/E26502_01/html/E28388/eoiyg.html
+
 ## Mac
 
 ```
