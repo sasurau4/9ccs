@@ -172,6 +172,10 @@ Var *find_lvar(Token *tok) {
     return map_get(lvars, tok->str);
 }
 
+Var *find_gvar(Token *tok) {
+    return map_get(gvars, tok->str);
+}
+
 Function *find_func(Token *tok) {
     return map_get(funcs, tok->str);
 }
@@ -354,18 +358,25 @@ Node *new_node_num(int val) {
     return node;
 }
 
-Node *new_node_lvar(Token *tok) {
+Node *new_node_var(Token *tok) {
     Node *node = calloc(1, sizeof(Node));
-    node->kind = ND_LVAR;
 
-    Var *lvar = find_lvar(tok);
-    if (lvar) {
-        node->offset = lvar->offset;
-        node->type = lvar->type;
-    } else {
-        error_at(tok, "Local variable not defined.");
+    // Try to resolve LVar
+    Var *var = find_lvar(tok);
+    if (var) {
+        node->kind = ND_LVAR;
+        node->offset = var->offset;
+        node->type = var->type;
+        return node;
+    } 
+    // If not found in LVar, then try to resolve GVar
+    var = find_gvar(tok);
+    if (var) {
+        node->kind = ND_GVAR;
+        node->type = var->type;
+        return node;
     }
-    return node;
+    error_at(tok, "Variable not defined.");
 }
 
 Node *new_node_array_index_access(Node *lhs, Node *rhs) {
@@ -435,7 +446,7 @@ Node *primary() {
             }
         }
 
-        return new_node_lvar(tok);
+        return new_node_var(tok);
     }
 
     return new_node_num(expect_number());
