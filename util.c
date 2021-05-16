@@ -88,3 +88,10 @@ int size_of(Type *ty) {
     assert(ty->ty == PTR);
     return 8;
 }
+
+int calc_need_byte(Type *ty) {
+    if (ty->ty == ARRAY) {
+        return size_of(ty->ptr_to) * ty->array_size;
+    } 
+    return 8;
+}

@@ -48,6 +48,11 @@ void gen_lval(Node *node) {
     } else if (node->kind == ND_DEREF) {
         gen(node->lhs);
         return;
+    } else if (node->kind == ND_GVAR) {
+        // Note: It's OK like "QWORD PTR hoge[rip]"
+        printf("    lea rax, %s[rip]\n", node->name);
+        printf("    push rax\n");
+        return;
     }
     error("Left value of assignment is not variable, actual: %i\n", node->kind);
 }
@@ -91,6 +96,7 @@ void gen(Node *node) {
             printf("    push %d\n", node->val);
             return;
         }
+        case ND_GVAR:
         case ND_LVAR: {
             gen_lval(node);
             if (node->type->ty != ARRAY) {
@@ -272,4 +278,23 @@ void gen(Node *node) {
     }
 
     printf("    push rax\n");
+}
+
+void gen_gvardef(Var *gvar) {
+    printf("%s:\n", gvar->name);
+    printf("    .zero %d\n", calc_need_byte(gvar->type));
+}
+
+void gen_program(Program *program) {
+    printf(".intel_syntax noprefix\n");
+
+    printf(".bss\n");
+    for (int i = 0; i < program->gvars->keys->len; i++) {
+        gen_gvardef(program->gvars->vals->data[i]);
+    }
+
+    printf(".text\n");
+    for (int i = 0; i < program->funcs->keys->len; i++) {
+        gen_func(program->funcs->vals->data[i]);
+    }
 }

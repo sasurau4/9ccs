@@ -374,6 +374,7 @@ Node *new_node_var(Token *tok) {
     if (var) {
         node->kind = ND_GVAR;
         node->type = var->type;
+        node->name = var->name;
         return node;
     }
     error_at(tok, "Variable not defined.");
@@ -399,11 +400,7 @@ Var *new_var(Token *tok, Type *type, bool is_local) {
             Var *last_lvar = vec_last(lvars->vals);
             prev_offset = last_lvar->offset;
         }
-        if (type->ty == ARRAY) {
-            var->offset = prev_offset + size_of(type->ptr_to) * type->array_size;
-        } else {
-            var->offset = prev_offset + 8;
-        }
+        var->offset = prev_offset + calc_need_byte(type);
     }
     return var;
 }

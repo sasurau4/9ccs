@@ -22,10 +22,6 @@ int main(int argc, char **argv) {
     token = tokenize(user_input);
     program = parse();
 
-    printf(".intel_syntax noprefix\n");
-
-    for (int i = 0; i < program->funcs->keys->len; i++) {
-        gen_func(program->funcs->vals->data[i]);
-    }
+    gen_program(program);
     return 0;
 }

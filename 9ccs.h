@@ -98,6 +98,7 @@ void *map_get(Map *map, char *key);
 int map_geti(Map *map, char *key, int default_);
 bool map_exists(Map *map, char *key);
 int size_of(Type *ty);
+int calc_need_byte(Type *ty);
 
 typedef struct Node Node;
 
@@ -166,6 +167,7 @@ Node *primary();
  * */
 void gen(Node *node);
 void gen_func(Function *func);
+void gen_program(Program *program);
 
 /**
  * Globals

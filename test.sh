@@ -337,4 +337,43 @@ int *bazz() {}
 int foobar() {}
 int main() { return 0; }
 "
+assert 6 "
+int foo;
+int bar() {
+    foo = 14;
+    return foo;
+}
+int main() {
+    int foo = 6;
+    return foo;
+}
+"
+assert 14 "
+int foo;
+int bar() {
+    foo = 14;
+    return foo;
+}
+int main() {
+    int foo = 6;
+    return bar();
+}
+"
+assert 13 "
+int bar[10];
+int main() { 
+    bar[1] = 13;
+    return bar[1];
+}
+"
+assert 31 "
+int foo;
+int foobar() {
+    return 11;
+}
+int main() {
+    foo = 20;
+    return foobar() + foo;
+}
+"
 echo OK
