@@ -375,55 +375,31 @@ Node *new_node_array_index_access(Node *lhs, Node *rhs) {
     return array_access;
 }
 
-// TODO merge to new_var
-Var *new_lvar(Token *tok, Type *type) {
-    Var *lvar = calloc(1, sizeof(Var));
-    lvar->name = tok->str;
-    lvar->len = tok->len;
-    int prev_offset = 0;
-    if (lvars->keys->len > 0) {
-        Var *last_lvar = vec_last(lvars->vals);
-        prev_offset = last_lvar->offset;
-    }
-    if (type->ty == ARRAY) {
-        lvar->offset = prev_offset + size_of(type->ptr_to) * type->array_size;
-    } else {
-        lvar->offset = prev_offset + 8;
-    }
-    lvar->type = type;
-    lvar->is_local = true;
-    return lvar;
-}
-
 Var *new_var(Token *tok, Type *type, bool is_local) {
     Var *var = calloc(1, sizeof(Var));
     var->name = tok->str;
     var->len = tok->len;
     var->type = type;
     var->is_local = is_local;
+    // Set offset for LVar
+    if (is_local) {
+        int prev_offset = 0;
+        if (lvars->keys->len > 0) {
+            Var *last_lvar = vec_last(lvars->vals);
+            prev_offset = last_lvar->offset;
+        }
+        if (type->ty == ARRAY) {
+            var->offset = prev_offset + size_of(type->ptr_to) * type->array_size;
+        } else {
+            var->offset = prev_offset + 8;
+        }
+    }
     return var;
 }
 
 void add_new_lvar() {
-    // TODO: Refactor to expect_ty
-    Type *type = &int_ty;
-    while (consume("*")) {
-        Type *ptr_typ = calloc(1, sizeof(Type));
-        ptr_typ->ty = PTR;
-        ptr_typ->ptr_to = type;
-        type = ptr_typ;
-    }
-    if (token->kind != TK_IDENT) {
-        error_at(token, "Expect ident.");
-    }
-    if (check_token(token->next, "[")) {
-        Type *array_type = calloc(1, sizeof(Type));
-        array_type->array_size = token->next->next->val;
-        array_type->ty = ARRAY;
-        array_type->ptr_to = type;
-        type = array_type;
-    }
-    Var *lvar = new_lvar(token, type);
+    Type *type = expect_ty();
+    Var *lvar = new_var(token, type, true);
     map_put(lvars, lvar->name, lvar);
     return;
 }
