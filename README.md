@@ -262,11 +262,31 @@ Without `static` keyword in C lang, I fell into the pit holl about the differenc
 
 See [my blog post in Japanese](https://sasurau4.hatenablog.com/entry/2021/05/12/120542)
 
-## Use Assembler Directives for global variable
+## Implement global variables
+### Use Assembler Directives for global variable
 
 `.zero` is assembler directive.
 
 See https://docs.oracle.com/cd/E26502_01/html/E28388/eoiyg.html
+
+### What is PIE?
+
+https://qiita.com/0yoyoyo/items/85122f31ba8d14332e3d
+https://tokyodebian-team.pages.debian.net/pdf2017/debianmeetingresume201712.pdf
+
+### What is `.data`, `.bss` and `.text` section?
+
+https://karino2.github.io/c-lesson/casm_link_load.html
+http://www.ertl.jp/~takayuki/readings/info/no02.html
+
+### What is `-fno-common` option?
+
+http://solid.kmckk.com/doc/skit/current/solid_toolchain/overview.html
+https://qiita.com/yasuhirokimura/items/d5337d73a016502b9d54
+
+## What R prefix stands for?
+
+https://stackoverflow.com/questions/43933379/what-do-the-e-and-r-prefixes-stand-for-in-the-names-of-intel-32-bit-and-64-bit-r
 
 ## Mac
 
