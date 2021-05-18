@@ -1,6 +1,7 @@
 #include "9ccs.h"
 
 static Type int_ty = {INT, NULL, 1};
+static Type char_ty = {CHAR, NULL, 0};
 
 void error_at(Token *token, char *fmt, ...) {
     va_list ap;
@@ -30,6 +31,7 @@ char *KW_WHILE = "while";
 char *KW_FOR = "for";
 char *KW_INT = "int";
 char *KW_SIZEOF = "sizeof";
+char *KW_CHAR = "char";
 
 /**
  * Tokenizer
@@ -73,6 +75,10 @@ bool check_token(Token *t, char *op) {
     return true;
 }
 
+bool check_token_is_ty(Token *t) {
+    return check_token(t, KW_INT) || check_token(t, KW_CHAR);
+}
+
 Token *consume_ident() {
     if (token->kind != TK_IDENT) {
         return 0;
@@ -110,7 +116,9 @@ int expect_number() {
 Type *expect_ty() {
     Type *type = calloc(1, sizeof(Type));
     if (consume(KW_INT)) {
-        Type *type = &int_ty;
+        type = &int_ty;
+    } else if (consume(KW_CHAR)) {
+        type = &char_ty;
     }
     if (!type) {
         error_at(token, "Expect type keyword");
@@ -283,6 +291,14 @@ Token *tokenize(char *p) {
             continue;
         }
 
+        if (is_reserved_keyword(p, KW_CHAR)) {
+            int keylen = strlen(KW_CHAR);
+            cur = new_token(TK_CHAR, cur, p, keylen, ln, col);
+            p += keylen;
+            col += keylen;
+            continue;
+        }
+
         if (is_reserved_keyword(p, KW_SIZEOF)) {
             int keylen = strlen(KW_SIZEOF);
             cur = new_token(TK_SIZEOF, cur, p, keylen, ln, col);
@@ -424,8 +440,10 @@ Node *primary() {
         if (consume("(")) {
             Node *node = calloc(1, sizeof(Node));
             node->kind = ND_CALL;
+            // TODO: check whether exist tok name function defined
             node->name = tok->str;
             node->args = new_vec();
+            // TODO iranai
             node->type = &int_ty;
             for(;;) {
                 if (consume(")")) {
@@ -568,7 +586,7 @@ Node *assign() {
 
 Node *expr() {
     // Handle var definition
-    if (consume(KW_INT)) {
+    if (check_token_is_ty(token)) {
         add_new_lvar();
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_VARDEF;

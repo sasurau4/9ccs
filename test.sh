@@ -376,4 +376,21 @@ int main() {
     return foobar() + foo;
 }
 "
+assert 10 "
+char main() {
+    char x[2];
+    x[1] = 10;
+    return x[1];
+}
+"
+assert 7 "
+char x[2];
+int main() {
+    x[0] = -12;
+    x[1] = 14;
+    int y;
+    y = 5;
+    return x[0] + x[1] + y;
+}
+"
 echo OK

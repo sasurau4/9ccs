@@ -99,11 +99,12 @@ void gen(Node *node) {
         case ND_GVAR:
         case ND_LVAR: {
             gen_lval(node);
-            if (node->type->ty != ARRAY) {
-                printf("    pop rax\n");
-                printf("    mov rax, [rax]\n");
-                printf("    push rax\n");
+            if (node->type->ty == ARRAY) {
+                return;
             }
+            printf("    pop rax\n");
+            printf("    mov rax, [rax]\n");
+            printf("    push rax\n");
             return;
         }
         case ND_ASSIGN: {

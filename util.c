@@ -85,6 +85,9 @@ int size_of(Type *ty) {
     if (ty->ty == INT) {
         return 4;
     }
+    if (ty->ty == CHAR) {
+        return 1;
+    }
     assert(ty->ty == PTR);
     return 8;
 }
