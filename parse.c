@@ -540,23 +540,22 @@ Node *unary() {
         return new_node_num(size_of(node->type));
     }
 
-    Node *pri = calloc(1, sizeof(Node));
+    Node *node = calloc(1, sizeof(Node));
     if (consume("+")) {
-        pri = primary();
+        node = unary();
     } else if (consume("-")) {
-        Node *node = new_node(ND_SUB, new_node_num(0), primary());
-        pri = node;
+        node = new_node(ND_SUB, new_node_num(0), unary());
     } else {
-        pri = primary();
+        node = primary();
     } 
 
     if (!consume("[")) {
-        return pri;
+        return node;
     }
     // Support array access syntax like "2[a]" and "a[2]"
     Node *array_index_access_node = calloc(1, sizeof(Node));
     Node *array_access_index_node = expr();
-    array_index_access_node = new_node_array_index_access(pri, array_access_index_node);
+    array_index_access_node = new_node_array_index_access(node, array_access_index_node);
     expect("]");
     return array_index_access_node;
 }
