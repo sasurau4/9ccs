@@ -288,6 +288,33 @@ https://qiita.com/yasuhirokimura/items/d5337d73a016502b9d54
 
 https://stackoverflow.com/questions/43933379/what-do-the-e-and-r-prefixes-stand-for-in-the-names-of-intel-32-bit-and-64-bit-r
 
+## Errata of compiler book
+
+### Compiler error
+
+```
+foo.c:10: x = y + + 5;
+                  ^ 式ではありません
+```
+
+The above is valid expression in C. See https://godbolt.org/z/W73W3arnY
+
+### unary EBNF
+
+```
+expr    = mul ("+" mul | "-" mul)*
+mul     = unary ("*" unary | "/" unary)*
+unary   = ("+" | "-")? primary
+primary = num | "(" expr ")"
+```
+
+But, [the reference implementation](https://github.com/rui314/chibicc/commit/bb5fe99dbad62c9516ec6a4bc64e444d09115e6d#diff-a0cb465674c1b01a07d361f25a0ef2b0214b7dfe9412b7777f89add956da10ecR200-R201) says following.
+
+```
+// unary = ("+" | "-")? unary
+//       | primary
+```
+
 ## Mac
 
 ```
