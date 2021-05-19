@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 
 typedef enum {
     TK_RESERVED,
@@ -102,6 +103,7 @@ int map_geti(Map *map, char *key, int default_);
 bool map_exists(Map *map, char *key);
 int size_of(Type *ty);
 int calc_need_byte(Type *ty);
+void error(char *fmr, ...);
 
 typedef struct Node Node;
 
@@ -177,7 +179,8 @@ void gen_program(Program *program);
  * Globals
  * */
 extern Token *token;
-extern char *user_input;
+extern char *source;
+extern char *filename;
 extern Map *lvars;
 extern Map *gvars;
 extern Map *funcs;

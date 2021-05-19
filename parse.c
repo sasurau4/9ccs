@@ -3,21 +3,32 @@
 static Type int_ty = {INT, NULL, 1};
 static Type char_ty = {CHAR, NULL, 0};
 
-void error_at(Token *token, char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-
-    int ln = token->ln;
-    fprintf(stderr, "Error at %d:%d\n", ln, token->col);
-    fprintf(stderr, "%s", token->str);
-    while(token->next && token->next->ln == ln) {
-        fprintf(stderr, " %s", token->next->str);
-        token = token->next;
+void error_at(Token *token, char *msg) {
+    int line_num = token->ln;
+    // 表示すべきlineの開始位置を見つける
+    char *line = source;
+    int current_line_num = 1;
+    for (int current_line_num = 1; current_line_num < line_num; line++) {
+        if (*line == '\n') {
+            current_line_num++;
+        }
     }
-    fprintf(stderr, "\n");
-    fprintf(stderr, "^ ");
-    vfprintf(stderr, fmt, ap);
-    fprintf(stderr, "\n");
+
+    // 表示すべきlineの終了位置を見つける
+    char *end = line;
+
+    while (*end != '\n') {
+        end++;
+    }
+
+    // file名とline_numを出力する
+    int indent = fprintf(stderr, "%s:%d: ", filename, line_num);
+    fprintf(stderr, "%.*s\n", (int)(end - line), line);
+
+    // エラーの発生したpositionを出力する
+    int pos = token->col + indent;
+    fprintf(stderr, "%*s", pos, "");
+    fprintf(stderr, "^ %s\n", msg);
     exit(1);
 }
 
@@ -489,6 +500,7 @@ Node *primary() {
 
         return new_node_var(tok);
     }
+    printf("expect num: %d\n", token->val);
 
     return new_node_num(expect_number());
 }

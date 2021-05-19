@@ -3,15 +3,6 @@
 // Use for label name for control flow
 int total_control_flow_count = 0;
 
-void error(char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-
-    vfprintf(stderr, fmt, ap);
-    fprintf(stderr, "\n");
-    exit(1);
-}
-
 // TODO: refactor to Map
 char *gen_arg_reg_name(int i) {
     switch(i) {

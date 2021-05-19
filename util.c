@@ -98,3 +98,11 @@ int calc_need_byte(Type *ty) {
     } 
     return 8;
 }
+
+void error(char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "\n");
+    exit(1);
+}
