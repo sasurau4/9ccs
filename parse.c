@@ -328,6 +328,21 @@ Token *tokenize(char *p) {
             continue;
         }
 
+        if (*p == '"') {
+            cur = new_token(TK_RESERVED, cur, p++, 1, ln, col++);
+            int i = 0;
+            while (*(p + i) != '"') {
+                i += 1;
+                continue;
+            }
+            cur = new_token(TK_STR, cur, p, i, ln, col);
+            p += i;
+            col += i;
+            assert(*p == '"');
+            cur = new_token(TK_RESERVED, cur, p++, 1, ln, col++);
+            continue;
+        }
+
 
         error_at(token, "Can't tokenize");
     }
@@ -432,6 +447,17 @@ Node *primary() {
     if (consume("(")) {
         Node *node = expr();
         expect(")");
+        return node;
+    }
+
+    if (consume("\"")) {
+        assert(token->kind == TK_STR);
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_STR;
+        node->str_index = found_strs->len;
+        vec_push(found_strs, token->str);
+        token = token->next;
+        expect("\"");
         return node;
     }
 

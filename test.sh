@@ -393,4 +393,11 @@ int main() {
     return x[0] + x[1] + y;
 }
 "
+assert 10 '
+int main() {
+    char *x = "abc";
+    printf(x);
+    return 10;
+}
+'
 echo OK

@@ -18,6 +18,7 @@ typedef enum {
     TK_FOR,
     TK_INT,
     TK_CHAR,
+    TK_STR,
     TK_SIZEOF,
     TK_IDENT,
     TK_NUM,
@@ -60,6 +61,7 @@ typedef enum {
     ND_DEREF, // 19
     ND_VARDEF, // 20
     ND_GVAR, // 21
+    ND_STR, // 22
 } NodeKind;
 
 typedef struct Type Type;
@@ -125,6 +127,7 @@ struct Node {
     Node *inc;
     int val; // If kind is ND_NUM, this hold value
     int offset; // If kind is ND_LVAR, this hold offset from RBP
+    int str_index; // If kind is ND_STR, this hold the number appeared in lavel suffix like .LC0
 };
 
 typedef struct Var Var;
@@ -178,3 +181,4 @@ extern char *user_input;
 extern Map *lvars;
 extern Map *gvars;
 extern Map *funcs;
+extern Vector *found_strs;

@@ -193,6 +193,7 @@ void gen(Node *node) {
                 printf("    pop rax\n");
                 printf("    mov %s, rax\n", register_name);
             }
+            printf("    mov al, 0\n");
             printf("    call %s\n", node->name);
             printf("    push rax\n");
             return;
@@ -212,6 +213,12 @@ void gen(Node *node) {
             if (node->init) {
                 gen(node->init);
             }
+            return;
+        }
+        case ND_STR: {
+            printf("    # This is string!\n");
+            printf("    lea rax, [rip+.LC%d]\n", node->str_index);
+            printf("    push rax\n");
             return;
         }
     }
@@ -288,6 +295,11 @@ void gen_gvardef(Var *gvar) {
 
 void gen_program(Program *program) {
     printf(".intel_syntax noprefix\n");
+
+    for (int i = 0; i < found_strs->len; i++) {
+        printf(".LC%d:\n", i);
+        printf("    .string \"%s\"\n", (char *)found_strs->data[i]);
+    }
 
     printf(".bss\n");
     for (int i = 0; i < program->gvars->keys->len; i++) {

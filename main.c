@@ -11,6 +11,7 @@ Program *program;
 Map *lvars;
 Map *gvars;
 Map *funcs;
+Vector *found_strs;
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -20,6 +21,7 @@ int main(int argc, char **argv) {
 
     user_input = argv[1];
     token = tokenize(user_input);
+    found_strs = new_vec();
     program = parse();
 
     gen_program(program);
