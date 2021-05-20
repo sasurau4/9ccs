@@ -219,6 +219,30 @@ Token *tokenize(char *p) {
             continue;
         }
 
+        // Skip line comment
+        if (strncmp(p, "//", 2) == 0) {
+            p += 2;
+            col += 2;
+            while (*p != '\n') {
+                col++;
+                p++;
+            }
+            continue;
+        }
+
+        // Skip block comment
+        if (strncmp(p, "/*", 2) == 0) {
+            char *q = strstr(p + 2, "*/");
+            col += 2;
+            if (!q) {
+                // Token is dummy
+                cur = new_token(TK_NUM, cur, p, 0, ln, col);
+                error_at(cur, "Black comment is not closed");
+            }
+            p = q + 2;
+            continue;
+        }
+
         if (starts_with("==", p) || 
             starts_with("!=", p) || 
             starts_with(">=", p) ||
@@ -354,8 +378,9 @@ Token *tokenize(char *p) {
             continue;
         }
 
-
-        error_at(token, "Can't tokenize");
+        // Token is dummy for error reporting
+        cur = new_token(TK_NUM, cur, p, 0, ln, col);
+        error_at(cur, "Can't tokenize");
     }
 
     new_token(TK_EOF, cur, p, 1, ln, col);
