@@ -17,7 +17,7 @@ assert() {
 }
 # exit
 
-assert 0 ./test/case_expr.c
+assert 0 ./test/test_expr.c
 exit
 assert 47 'int main() { return 5+6*7; }'
 assert 15 'int main() { return 5*(9-6); }'

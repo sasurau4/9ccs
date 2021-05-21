@@ -1,4 +1,4 @@
-int test(int expected, int actual) {
+int test_expr(int expected, int actual) {
     if (expected == actual) {
         printf("Test pass\n");
     } else {
@@ -19,6 +19,7 @@ int main() {
     test_expr(25, 5 + 20);
     test_expr(21, 5 + 20 - 4);
     test_expr(41, 12 + 34 -5);
+    test_expr(47, 5+6*7);
 
     return 0;
 }
