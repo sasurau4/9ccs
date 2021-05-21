@@ -525,7 +525,6 @@ Node *primary() {
 
         return new_node_var(tok);
     }
-    printf("expect num: %d\n", token->val);
 
     return new_node_num(expect_number());
 }
