@@ -16,11 +16,9 @@ assert() {
     fi
 }
 # exit
-assert 0 'int main() { return 0; }'
-assert 42 "int main() { return 42; }"
-assert 25 "int main() { return 5+20; }"
-assert 21 "int main() { return 5+20-4; }"
-assert 41 "int main() { return 12 + 34 - 5 ; }"
+
+assert 0 ./test/case_expr.c
+exit
 assert 47 'int main() { return 5+6*7; }'
 assert 15 'int main() { return 5*(9-6); }'
 assert 4 'int main() { return (3+5)/2; }'
