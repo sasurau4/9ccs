@@ -1,14 +1,3 @@
-int test(int expected, int actual) {
-    if (expected == actual) {
-        printf("Test pass with %d\n", expected);
-    } else {
-        printf("====\n");
-        printf("Test failed\n");
-        printf("Expect: %d\n", expected);
-        printf("Actual: %d\n", actual);
-        exit(1);
-    }
-}
 int main() { 
     // This is comment!
     /* This is block comment!
