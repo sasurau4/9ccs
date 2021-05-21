@@ -44,6 +44,42 @@ int case_if_3() {
     if (a-b) return a - b;
     else return a + b;
 }
+int case_while_1() {
+    int a;
+    a = 1;
+    while (a<4) a = a+1;
+    return a;
+}
+int case_for_1() {
+    int a;
+    a=10;
+    // TODD This is not C compatible, function return 0 if that hasn't return keyword.
+    for (int b=0;b<3; b=b+1) a=a+1;a;
+}
+int case_for_2() {
+    int a;a=10;
+    for (int b=0;b<3; b=b+1) if(a==11) return a; else a=a+1;a;
+}
+int case_for_3() {
+    int a;int b;a=10;b=0;
+    for (;b<3; b=b+1) a=a+1;a;
+}
+int case_for_4() { 
+    int a;a=10;
+    for (int b=0;;b=b+1) a=a+1;a; 
+}
+int case_for_5() { 
+    // TODD This is not C compatible, thee last b is undefined variable.
+    for (int b=0;b<3;) b=b+1;b; 
+}
+int case_for_6() { 
+    int a;a=1;
+    for (;;) return a;
+}
+int case_for_7() { 
+    int a;a=11;
+    for (;;) return 12;
+}
 
 int main() { 
     test("stmt_1", 52, case1());
@@ -57,6 +93,14 @@ int main() {
     test("if_1", 2, case_if_1());
     test("if_2", 10, case_if_2());
     test("if_3", 2, case_if_3());
+    test("while_1", 4, case_while_1());
+    test("for_1", 13, case_for_1());
+    test("for_2", 11, case_for_2());
+    test("for_3", 13, case_for_3());
+    test("for_4", 10, case_for_4());
+    test("for_5", 3, case_for_5());
+    test("for_6", 1, case_for_6());
+    test("for_7", 12, case_for_7());
 
     return 0;
 }
