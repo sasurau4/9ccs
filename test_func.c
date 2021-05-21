@@ -39,9 +39,9 @@ void allocp4(int **p, int x1, int x2, int x3, int x4) {
     return;
 }
 
-int test(int expected, int actual) {
+int test(char *test_name, int expected, int actual) {
     if (expected == actual) {
-        printf("Test pass with %d\n", expected);
+        printf("Test %s pass\n", test_name);
     } else {
         printf("====\n");
         printf("Test failed\n");

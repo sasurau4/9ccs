@@ -18,26 +18,8 @@ assert() {
 # exit
 
 assert 0 ./test/test_expr.c
+assert 0 ./test/test_control_flow.c
 exit
-assert 52 'int main() { int a; return a = 52; a; }'
-assert 1 "int main() { int a; a = 1;
-return a;
-}"
-assert 14 "int main() { int a; a = 3;
-int b;
-b = 5 * 6 - 8;
-return a + b / 2; }"
-assert 2 "int main() { int a; a = 1;
-return a = a + 1; }"
-assert 10 "int main() { int a = 10; return a; }"
-assert 6 "int main() { int foo; foo = 1;
-int bar;
-bar = 2 + 3;
-return foo + bar; }"
-assert 2 "int main() { return 2; }"
-assert 2 "int main() { return 2;
-return 1; }"
-assert 2 'int main() { if (1) return 2; }'
 assert 10 'int main() { if (0) return 2; else return 10; }'
 assert 2 "int main() { int a; int b; a = 1;
 b = 1;
