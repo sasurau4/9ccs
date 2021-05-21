@@ -13,6 +13,7 @@ int main() {
     // This is comment!
     /* This is block comment!
     */
+    // Test arithmetic ope
     test(0, 0);
     test(42, 42);
     test(2, 1 + 1);
@@ -24,6 +25,21 @@ int main() {
     test(4, (3+5)/2);
     test(5, +5);
     test(10, -10+20);
+
+    // Test relational operators
+    test(1, 2 == 2);
+    test(0, 12 == 2);
+    test(1, 100 != 1);
+    test(0, 100 != 2 * 50);
+    test(1, 1 < 2);
+    test(0, 1 < 1);
+    test(0, 1 > 1);
+    test(0, 2 <= 1);
+    test(1, 1 <= 1);
+    test(1, 1 >= 1);
+    test(0, 1 >= 5);
+    test(0, 4+6*7 < 46);
+    test(1, 4+6*7 <= 46);
 
     return 0;
 }

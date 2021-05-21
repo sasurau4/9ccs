@@ -19,19 +19,6 @@ assert() {
 
 assert 0 ./test/test_expr.c
 exit
-assert 1 'int main() { return 2 == 2; }'
-assert 0 'int main() { return 12 == 1; }'
-assert 1 'int main() { return 100 != 1; }'
-assert 0 'int main() { return 100 != 2 * 50; }'
-assert 1 'int main() { return 1 < 2; }'
-assert 0 'int main() { return 1 < 1; }'
-assert 0 'int main() { return 1 > 1; }'
-assert 0 'int main() { return 2 <= 1; }'
-assert 1 'int main() { return 1 <= 1; }'
-assert 1 'int main() { return 1 >= 1; }'
-assert 0 'int main() { return 1 >= 5; }'
-assert 0 'int main() { return 4+6*7 < 46; }'
-assert 1 'int main() { return 4+6*7 <= 46; }'
 assert 52 'int main() { int a; return a = 52; a; }'
 assert 1 "int main() { int a; a = 1;
 return a;
