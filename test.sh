@@ -19,11 +19,6 @@ assert() {
 
 assert 0 ./test/test_expr.c
 exit
-assert 47 'int main() { return 5+6*7; }'
-assert 15 'int main() { return 5*(9-6); }'
-assert 4 'int main() { return (3+5)/2; }'
-assert 5 'int main() { return +5; }'
-assert 10 'int main() { return -10+20; }'
 assert 1 'int main() { return 2 == 2; }'
 assert 0 'int main() { return 12 == 1; }'
 assert 1 'int main() { return 100 != 1; }'
