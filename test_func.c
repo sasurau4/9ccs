@@ -41,10 +41,10 @@ void allocp4(int **p, int x1, int x2, int x3, int x4) {
 
 int test(char *test_name, int expected, int actual) {
     if (expected == actual) {
-        printf("Test %s pass\n", test_name);
+        printf("Test %s passed\n", test_name);
     } else {
         printf("====\n");
-        printf("Test failed\n");
+        printf("Test %s failed\n", test_name);
         printf("Expect: %d\n", expected);
         printf("Actual: %d\n", actual);
         exit(1);
