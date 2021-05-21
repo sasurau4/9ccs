@@ -288,6 +288,10 @@ https://qiita.com/yasuhirokimura/items/d5337d73a016502b9d54
 
 https://stackoverflow.com/questions/43933379/what-do-the-e-and-r-prefixes-stand-for-in-the-names-of-intel-32-bit-and-64-bit-r
 
+## assert is not func, but macro
+
+https://godbolt.org/z/cWj48TzKs
+
 ## Errata of compiler book
 
 ### Compiler error
