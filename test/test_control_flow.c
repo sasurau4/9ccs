@@ -80,6 +80,64 @@ int case_for_7() {
     int a;a=11;
     for (;;) return 12;
 }
+int case_return_1() {
+    return 3;
+}
+int case_if_else_1() {
+    int a;int b;
+    if (1) {a=10;b=2;return a;} else {a=1;b=3;return b;}
+}
+int case_func_call_1() {
+    // From test_func
+    shout();return 1;
+}
+int case_func_call_2() {
+    // From test_func
+    return sum(3,4);
+}
+int helper_case_func_def_1() {
+    return 3;
+}
+int case_func_def_1() {
+    return helper_case_func_def_1();
+}
+int helper_case_func_def_2(int x) {
+    return x;
+}
+int case_func_def_2() {
+    return helper_case_func_def_2(4);
+}
+int helper_case_func_def_3_double(int x) {
+    return x*2;
+}
+int helper_case_func_def_3_triple(int x) {
+    return x*3;
+}
+int case_func_def_3() {
+    return helper_case_func_def_3_double(2) + helper_case_func_def_3_triple(3);
+}
+int case_func_def_4() {
+    return helper_case_func_def_2(4-1);
+}
+int helper_case_func_def_5(int x, int y) {
+    return x+y;
+}
+int case_func_def_5() {
+    return helper_case_func_def_5(1, 3);
+}
+int helper_case_func_def_6(int x, int y, int z) {
+    return x*3+y*2+z;
+}
+int case_func_def_6() {
+    return helper_case_func_def_6(1,3,10);
+}
+int helper_fibonacci(int x) {
+    if (x<2) return x;
+    return helper_fibonacci(x-1)+helper_fibonacci(x-2);
+}
+int case_fibonacci() {
+    return helper_fibonacci(10);
+}
 
 int main() { 
     test("stmt_1", 52, case1());
@@ -101,6 +159,18 @@ int main() {
     test("for_5", 3, case_for_5());
     test("for_6", 1, case_for_6());
     test("for_7", 12, case_for_7());
+    test("return_1", 3, case_return_1());
+    test("if_else_1", 10, case_if_else_1());
+    test("func_call_1", 1, case_func_call_1());
+    test("func_call_2", 7, case_func_call_2());
+    test("func_call_2", 7, case_func_call_2());
+    test("func_def_1", 3, case_func_def_1());
+    test("func_def_2", 4, case_func_def_2());
+    test("func_def_3", 13, case_func_def_3());
+    test("func_def_4", 3, case_func_def_4());
+    test("func_def_5", 4, case_func_def_5());
+    test("func_def_6", 19, case_func_def_6());
+    test("fibonacci", 55, case_fibonacci());
 
     return 0;
 }
