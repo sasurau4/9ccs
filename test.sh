@@ -20,10 +20,6 @@ assert() {
 assert 0 ./test/test_expr.c
 assert 0 ./test/test_control_flow.c
 exit
-assert 4 "
-int main() {
-    return sizeof(sizeof(1));
-}"
 assert 0 "
 int main() {
     int a[2];
