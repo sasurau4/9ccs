@@ -138,6 +138,67 @@ int helper_fibonacci(int x) {
 int case_fibonacci() {
     return helper_fibonacci(10);
 }
+int case_addr_1() {
+    int x;int y;
+    x=3;y=&x;return *y;
+}
+int case_addr_2() {
+    int x;int y;int z;
+    x=3;y=5;z=&y+2;return *z;
+}
+int case_deref_1() {
+    int x;int *y;
+    y = &x;*y=3;return x;
+}
+int case_ptr_plus_1() {
+    int *p;int q;
+    // From test_func
+    allocp2(&p,30,31);
+    q=*p+3;
+    return q;
+}
+int case_ptr_plus_2() {
+    // From test_func
+    int *p = alloc1(3,6);
+    return *(p+1);
+} 
+int case_ptr_plus_3() {
+    // From test_func
+    int *p;allocp2(&p,30,31);
+    int *q;q=p+1;
+    return *q;
+} 
+int case_ptr_plus_4() {
+    // From test_func
+    int *p;allocp4(&p,1,2,4,8);
+    int *q;q=p+3;
+    return *q;
+} 
+int case_sizeof_1() {
+    int x;return sizeof(x);
+}
+int case_sizeof_2() {
+    int x;return sizeof x;
+}
+int case_sizeof_3() {
+    int *x;return sizeof(x);
+}
+int case_sizeof_4() {
+    int x;return sizeof(x+3);
+}
+int case_sizeof_5() {
+    int *x;return sizeof(x+3);
+}
+int case_sizeof_6() {
+    int *x;return sizeof(*x);
+}
+int case_sizeof_7() {
+    return sizeof(1);
+}
+int case_sizeof_8() {
+    return sizeof(sizeof(1));
+}
+
 
 int main() { 
     test("stmt_1", 52, case1());
@@ -171,6 +232,22 @@ int main() {
     test("func_def_5", 4, case_func_def_5());
     test("func_def_6", 19, case_func_def_6());
     test("fibonacci", 55, case_fibonacci());
+
+    test("addr_1", 3, case_addr_1());
+    test("addr_2", 3, case_addr_2());
+    test("deref_1", 3, case_deref_1());
+    test("ptr_plus_1", 33, case_ptr_plus_1());
+    test("ptr_plus_2", 6, case_ptr_plus_2());
+    test("ptr_plus_3", 31, case_ptr_plus_3());
+    test("ptr_plus_4", 8, case_ptr_plus_4());
+    test("sizeof_1", 4, case_sizeof_1());
+    test("sizeof_2", 4, case_sizeof_2());
+    test("sizeof_3", 8, case_sizeof_3());
+    test("sizeof_4", 4, case_sizeof_4());
+    test("sizeof_5", 8, case_sizeof_5());
+    test("sizeof_6", 4, case_sizeof_6());
+    test("sizeof_7", 4, case_sizeof_7());
+    test("sizeof_8", 4, case_sizeof_8());
 
     return 0;
 }
