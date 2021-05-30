@@ -206,7 +206,37 @@ int case_array_1() {
 int case_array_2() {
     static int a[1];*a=2;return *a;
 }
-
+int case_array_3() {
+    static int a[2]; *a = 2; *(a + 1) = 3;
+    return *(a + 1);
+}
+int case_array_4() {
+    static int a[2];*a = 2;*(a + 1) = 3;
+    int *p;p = a;
+    return *p + *(p + 1);
+}
+int case_array_access_1() {
+    static int a[3];a[0] = 2;a[1] = 3;a[2] = 4;
+    return a[2];
+}
+int case_array_access_2() {
+    static int a[3];a[1 + 1] = 4;
+    return a[2];
+}
+int case_array_access_3() {
+    static int a[3];2[a] = 4;return 2[a];
+}
+int case_array_access_4() {
+    static int a[3];(1+1)[a] = 4;return (1+1)[a];
+}
+int case_array_access_5() {
+    static int a[2];a[0] = 11;a[1] = 21;
+    return a[0] + a[1];
+}
+int case_array_access_6() {
+    static int a[3];a[0] = 11;a[1] = 21;a[2] = 30;
+    return a[0] + a[1] + a[2];
+}
 
 int main() { 
     test("stmt_1", 52, case1());
@@ -260,5 +290,13 @@ int main() {
 
     test("array_1", 0, case_array_1());
     test("array_2", 2, case_array_2());
+    test("array_3", 3, case_array_3());
+    test("array_4", 5, case_array_4());
+    test("array_access_1", 4, case_array_access_1());
+    test("array_access_2", 4, case_array_access_2());
+    test("array_access_3", 4, case_array_access_3());
+    test("array_access_4", 4, case_array_access_4());
+    test("array_access_5", 32, case_array_access_5());
+    test("array_access_6", 62, case_array_access_6());
     return 0;
 }
