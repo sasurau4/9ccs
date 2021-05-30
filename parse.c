@@ -1,7 +1,7 @@
 #include "9ccs.h"
 
-static Type int_ty = {INT, NULL, 1};
-static Type char_ty = {CHAR, NULL, 0};
+static Type int_ty = {INT, NULL, 1, false, 0};
+static Type char_ty = {CHAR, NULL, 0, false, 0};
 
 void error_at(Token *token, char *msg) {
     int line_num = token->ln;
@@ -43,6 +43,7 @@ char *KW_FOR = "for";
 char *KW_INT = "int";
 char *KW_SIZEOF = "sizeof";
 char *KW_CHAR = "char";
+char *KW_STATIC = "static";
 
 /**
  * Tokenizer
@@ -87,7 +88,7 @@ bool check_token(Token *t, char *op) {
 }
 
 bool check_token_is_ty(Token *t) {
-    return check_token(t, KW_INT) || check_token(t, KW_CHAR);
+    return check_token(t, KW_INT) || check_token(t, KW_CHAR) || check_token(t, KW_STATIC);
 }
 
 Token *consume_ident() {
@@ -126,18 +127,34 @@ int expect_number() {
 
 Type *expect_ty() {
     Type *type = calloc(1, sizeof(Type));
-    if (consume(KW_INT)) {
-        type = &int_ty;
-    } else if (consume(KW_CHAR)) {
-        type = &char_ty;
+    if (consume(KW_STATIC)) {
+        type->is_static = true;
+        static_count++;
+        type->unique_num = static_count;
+    } else {
+        type->is_static = false;
+        type->unique_num = 0;
     }
-    if (!type) {
+
+    if (consume(KW_INT)) {
+        type->ty = int_ty.ty;
+        type->ptr_to = int_ty.ptr_to;
+        type->array_size = int_ty.array_size;
+    } else if (consume(KW_CHAR)) {
+        type->ty = char_ty.ty;
+        type->ptr_to = char_ty.ptr_to;
+        type->array_size = char_ty.array_size;
+    }
+
+    if (!type && !type->ty) {
         error_at(token, "Expect type keyword");
     }
     while (consume("*")) {
         Type *ptr_typ = calloc(1, sizeof(Type));
         ptr_typ->ty = PTR;
         ptr_typ->ptr_to = type;
+        ptr_typ->is_static = type->is_static;
+        ptr_typ->unique_num = type->unique_num;
         type = ptr_typ;
     }
     if (token->kind != TK_IDENT) {
@@ -148,6 +165,8 @@ Type *expect_ty() {
         array_type->array_size = token->next->next->val;
         array_type->ty = ARRAY;
         array_type->ptr_to = type;
+        array_type->is_static = type->is_static;
+        array_type->unique_num = type->unique_num;
         type = array_type;
     }
     return type;
@@ -342,6 +361,14 @@ Token *tokenize(char *p) {
             continue;
         }
 
+        if (is_reserved_keyword(p, KW_STATIC)) {
+            int keylen = strlen(KW_STATIC);
+            cur = new_token(TK_STATIC, cur, p, keylen, ln, col);
+            p += keylen;
+            col += keylen;
+            continue;
+        }
+
         if (isdigit(*p)) {
             cur = new_token(TK_NUM, cur, p, 0, ln, col);
             cur->val = strtol(p, &p, 10);
@@ -434,6 +461,7 @@ Node *new_node_var(Token *tok) {
         node->kind = ND_LVAR;
         node->offset = var->offset;
         node->type = var->type;
+        node->name = var->name;
         return node;
     } 
     // If not found in LVar, then try to resolve GVar
@@ -461,7 +489,7 @@ Var *new_var(Token *tok, Type *type, bool is_local) {
     var->type = type;
     var->is_local = is_local;
     // Set offset for LVar
-    if (is_local) {
+    if (is_local && !type->is_static) {
         int prev_offset = 0;
         if (lvars->keys->len > 0) {
             Var *last_lvar = vec_last(lvars->vals);

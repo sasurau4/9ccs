@@ -20,6 +20,7 @@ typedef enum {
     TK_INT,
     TK_CHAR,
     TK_STR,
+    TK_STATIC,
     TK_SIZEOF,
     TK_IDENT,
     TK_NUM,
@@ -71,6 +72,8 @@ struct Type {
     enum { INT, PTR, ARRAY, CHAR } ty;
     struct Type *ptr_to;
     size_t array_size;
+    bool is_static;
+    int unique_num; // For static var uniqueness by appearance count
 };
 
 typedef struct {
@@ -181,6 +184,7 @@ void gen_program(Program *program);
 extern Token *token;
 extern char *source;
 extern char *filename;
+extern int static_count;
 extern Map *lvars;
 extern Map *gvars;
 extern Map *funcs;

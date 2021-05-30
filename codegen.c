@@ -32,10 +32,20 @@ char *gen_arg_reg_name(int i) {
 
 void gen_lval(Node *node) {
     if (node->kind == ND_LVAR) {
-        printf("    mov rax, rbp\n");
-        printf("    sub rax, %d\n", node->offset);
-        printf("    push rax\n");
-        return;
+        assert(node->type);
+        if (node->type->is_static) {
+            printf("# uni_num: %03d\n", node->type->unique_num);
+            char static_lvar_label[100];
+            snprintf(static_lvar_label, sizeof(static_lvar_label),"%s.%03d", node->name, node->type->unique_num);
+            printf("    lea rax, %s[rip]\n", static_lvar_label);
+            printf("    push rax\n");
+            return;
+        } else {
+            printf("    mov rax, rbp\n");
+            printf("    sub rax, %d\n", node->offset);
+            printf("    push rax\n");
+            return;
+        }
     } else if (node->kind == ND_DEREF) {
         gen(node->lhs);
         return;
@@ -48,14 +58,50 @@ void gen_lval(Node *node) {
     error("Left value of assignment is not variable, actual: %i\n", node->kind);
 }
 
+int calc_alignment(Type *ty) {
+    if (ty->ty == INT) {
+        return 4;
+    } else if (ty->ty == CHAR) {
+        return 1;
+    } else if (ty->ty == PTR) {
+        return 8;
+    }
+    assert(ty->ty == ARRAY);
+    int need_byte = calc_need_byte(ty);
+    if (need_byte > 31) {
+        return 32;
+    } else if (need_byte > 15) {
+        return 16;
+    } else if (need_byte > 7) {
+        return 8;
+    }
+    if (ty->ptr_to->ty == INT) {
+        return 4;
+    } else if (ty->ptr_to->ty == CHAR) {
+        return 1;
+    } 
+    error("Allignment can't detemined ty: %d\n", ty->ty);
+}
 void gen_func(Function *func) {
-    // Prologue
+    // Acquire space for static local variables
+    for (int i = 0; i < func->lvars->keys->len; i++) {
+        Var *var = func->lvars->vals->data[i];
+        if (var->type->is_static) {
+            char *static_lvar_label;
+            sprintf(static_lvar_label, "%s.%03d", var->name, var->type->unique_num);
+            int need_byte = calc_need_byte(var->type);
+            printf("    .local %s\n", static_lvar_label);
+            printf("    .comm %s,%d,%d\n", static_lvar_label, need_byte, calc_alignment(var->type));
+        }
+    }
+    // Function def
     printf(".globl %s\n", func->name);
     printf("%s: \n", func->name);
-
-    // Acquire space for variables
+    // Prologue
     printf("    push rbp\n");
     printf("    mov rbp, rsp\n");
+
+    // Acquire space for local variables
     if (func->lvars->keys->len > 0) {
         Var *last_lvar = vec_last(func->lvars->vals);
         printf("    sub rsp, %d\n", last_lvar->offset);
@@ -110,12 +156,7 @@ void gen(Node *node) {
         }
         case ND_RETURN: {
             gen(node->lhs);
-            // Is it correct to handle special for ND_CALL?
-            if (node->lhs->kind != ND_CALL) {
-                // All operations except function call left calculated value at stack top.
-                // function call already left return value at RAX, so not pop stack to RAX.
-                printf("    pop rax\n");
-            }
+            printf("    pop rax\n");
             printf("    mov rsp, rbp\n");
             printf("    pop rbp\n");
             printf("    ret\n");

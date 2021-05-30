@@ -11,6 +11,7 @@ Map *lvars;
 Map *gvars;
 Map *funcs;
 Vector *found_strs;
+int static_count;
 
 char *read_file(char *path) {
     FILE *fp = fopen(path, "r");
@@ -42,6 +43,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "The number of arguments is incorrect.\n");
         return 1;
     }
+    static_count = 0;
 
     filename = argv[1];
     source = read_file(filename);
