@@ -53,8 +53,7 @@ int case_while_1() {
 int case_for_1() {
     int a;
     a=10;
-    // TODD This is not C compatible, function return 0 if that hasn't return keyword.
-    for (int b=0;b<3; b=b+1) a=a+1;a;
+    for (int b=0;b<3; b=b+1) a=a+1;return a;
 }
 int case_for_2() {
     int a;a=10;
@@ -62,15 +61,15 @@ int case_for_2() {
 }
 int case_for_3() {
     int a;int b;a=10;b=0;
-    for (;b<3; b=b+1) a=a+1;a;
+    for (;b<3; b=b+1) a=a+1;return a;
 }
 int case_for_4() { 
     int a;a=10;
-    for (int b=0;;b=b+1) a=a+1;a; 
+    for (int b=0;;b=b+1) a=a+1;return a; 
 }
 int case_for_5() { 
     // TODD This is not C compatible, thee last b is undefined variable.
-    for (int b=0;b<3;) b=b+1;b; 
+    for (int b=0;b<3;) b=b+1;return b; 
 }
 int case_for_6() { 
     int a;a=1;
@@ -198,6 +197,15 @@ int case_sizeof_7() {
 int case_sizeof_8() {
     return sizeof(sizeof(1));
 }
+int case_static_1() {
+    static int a; a=10;return a;
+}
+int case_array_1() {
+    int a[2];return 0;
+}
+int case_array_2() {
+    static int a[1];*a=2;return *a;
+}
 
 
 int main() { 
@@ -248,6 +256,9 @@ int main() {
     test("sizeof_6", 4, case_sizeof_6());
     test("sizeof_7", 4, case_sizeof_7());
     test("sizeof_8", 4, case_sizeof_8());
+    test("static_1", 10, case_static_1());
 
+    test("array_1", 0, case_array_1());
+    test("array_2", 2, case_array_2());
     return 0;
 }
