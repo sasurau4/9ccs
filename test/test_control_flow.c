@@ -237,6 +237,46 @@ int case_array_access_6() {
     static int a[3];a[0] = 11;a[1] = 21;a[2] = 30;
     return a[0] + a[1] + a[2];
 }
+// Test for parsing global var and func def
+int *parse_ptr_gvar;
+int parse_garr[10];
+int *parse_ptr_func() {}
+int parse_func() {}
+
+int case_gvar_1_foo;
+int case_gvar_1_helper() {
+    case_gvar_1_foo = 14;
+    return case_gvar_1_foo;
+}
+int case_gvar_1() {
+    case_gvar_1_foo = 6;
+    return case_gvar_1_foo;
+}
+
+int case_gvar_2_foo;
+int case_gvar_2_helper() {
+    case_gvar_2_foo = 14;
+    return case_gvar_2_foo;
+}
+int case_gvar_2() {
+    case_gvar_2_foo = 6;
+    return case_gvar_2_helper();
+}
+
+int case_gvar_3_foo[10];
+int case_gvar_3() {
+    case_gvar_3_foo[1] = 13;
+    return case_gvar_3_foo[1];
+}
+
+int case_gvar_4_foo;
+int case_gvar_4_helper() {
+    return 11;
+}
+int case_gvar_4() {
+    case_gvar_4_foo = 20;
+    return case_gvar_4_helper() + case_gvar_4_foo;
+}
 
 int main() { 
     test("stmt_1", 52, case1());
@@ -298,5 +338,10 @@ int main() {
     test("array_access_4", 4, case_array_access_4());
     test("array_access_5", 32, case_array_access_5());
     test("array_access_6", 62, case_array_access_6());
+
+    test("gvar_1", 6, case_gvar_1());
+    test("gvar_2", 14, case_gvar_2());
+    test("gvar_3", 13, case_gvar_3());
+    test("gvar_4", 31, case_gvar_4());
     return 0;
 }
