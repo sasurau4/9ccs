@@ -4,7 +4,13 @@
 
 See https://www.sigbus.info/compilerbook
 
-### Points
+## How to run
+
+```
+make test
+```
+
+## Pit fall points
 
 #### Debugging with gdb
 
@@ -94,7 +100,7 @@ int main(int argc, char **argv) {
 }
 ```
 
-## Implement return stmt
+### Implement return stmt
 
 Encounter this crash.
 
@@ -106,7 +112,7 @@ return 2;
 
 This is caused by `consume` function take into consideration only for `TK_RESERVED`. Adding for `TK_RETURN` fix this issue.
 
-## Implement if and else stmt
+### Implement if and else stmt
 
 Following is work fine and return 2
 
@@ -135,19 +141,19 @@ main:
 
 We need to clear arranged registers (or stacks?)
 
-## Implement for
+### Implement for
 
 We need to handle `a = 1; for (;;) return a;`. If cond is null, generate `push 0\n` for cmp always is true.
 
-## Impl function call
+### Impl function call
 
 Missing `#define _GNU_SOURCE` and occured SIGSEGV.
 
 https://stackoverflow.com/questions/5582211/what-does-define-gnu-source-imply
 
-## Impl function definition
+### Impl function definition
 
-### stack and queue
+#### stack and queue
 
 Input `main() { a = 52; a; }`
 
@@ -159,7 +165,7 @@ pop op break the order of node. For my case, compiler generate `ND_LVAR` first a
 
 I fixed it with `gen(node->stmts->data[i])`.
 
-### Difference with 9ccs and real C semantics
+#### Difference with 9ccs and real C semantics
 
 All statements automatically return each value in my own C with 9ccs until now. For example, `main() { 2; }` return `2`.
 
@@ -200,7 +206,7 @@ So, C needs `return` statement to return value. Without it, no value returned. F
 
 From now on, my own C need to follow real C semantics.
 
-### ND_RETURN assumption
+#### ND_RETURN assumption
 
 ```c
             if (node->lhs->kind != ND_CALL) {
@@ -210,17 +216,17 @@ From now on, my own C need to follow real C semantics.
             }
 ```
 
-### arg is expression
+#### arg is expression
 
 Remember `foo(2 - 1);`. Arg is not `primary`, it's `expr`. If arg is `primary`, the parser go infinite loop and never end.
 
-## error_at broken
+### error_at broken
 
 error_at function broken at e9434af401b6b9841eeb2110525c79ea898fee7c.
 
 It cause infinite loop when error_at calling because token->str doesn't have all entire string after token but only token str.
 
-## Implement pointer + number or pointer - number
+### Implement pointer + number or pointer - number
 
 This is difficult and learn a lot from `https://github.com/rui314/9cc/commit/19ab268effbc7d5439545589373e7cf7fd7305ac`
 
@@ -230,7 +236,7 @@ This is difficult and learn a lot from `https://github.com/rui314/9cc/commit/19a
 
 *** stack smashing detected *** means overflow. This is caused by `int arr[2]; arr[3] = 1;`
 
-## Implement variable definition
+### Implement variable definition
 
 When I variable definition, I mistook that variable definition is treated same as variable use (ND_VAR).
 
@@ -256,39 +262,39 @@ int main() {
 }
 ```
 
-## Stack and heap
+### Stack and heap
 
 Without `static` keyword in C lang, I fell into the pit holl about the difference between stack and heap.
 
 See [my blog post in Japanese](https://sasurau4.hatenablog.com/entry/2021/05/12/120542)
 
-## Implement global variables
-### Use Assembler Directives for global variable
+### Implement global variables
+#### Use Assembler Directives for global variable
 
 `.zero` is assembler directive.
 
 See https://docs.oracle.com/cd/E26502_01/html/E28388/eoiyg.html
 
-### What is PIE?
+#### What is PIE?
 
 https://qiita.com/0yoyoyo/items/85122f31ba8d14332e3d
 https://tokyodebian-team.pages.debian.net/pdf2017/debianmeetingresume201712.pdf
 
-### What is `.data`, `.bss` and `.text` section?
+#### What is `.data`, `.bss` and `.text` section?
 
 https://karino2.github.io/c-lesson/casm_link_load.html
 http://www.ertl.jp/~takayuki/readings/info/no02.html
 
-### What is `-fno-common` option?
+#### What is `-fno-common` option?
 
 http://solid.kmckk.com/doc/skit/current/solid_toolchain/overview.html
 https://qiita.com/yasuhirokimura/items/d5337d73a016502b9d54
 
-## What R prefix stands for?
+### What R prefix stands for?
 
 https://stackoverflow.com/questions/43933379/what-do-the-e-and-r-prefixes-stand-for-in-the-names-of-intel-32-bit-and-64-bit-r
 
-## assert is not func, but macro
+### assert is not func, but macro
 
 https://godbolt.org/z/cWj48TzKs
 
