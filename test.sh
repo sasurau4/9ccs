@@ -20,13 +20,6 @@ assert() {
 assert 0 ./test/test_expr.c
 assert 0 ./test/test_control_flow.c
 exit
-assert 10 "
-char main() {
-    char x[2];
-    x[1] = 10;
-    return x[1];
-}
-"
 assert 7 "
 char x[2];
 int main() {

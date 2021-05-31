@@ -278,6 +278,24 @@ int case_gvar_4() {
     return case_gvar_4_helper() + case_gvar_4_foo;
 }
 
+int case_char_array_1() {
+    static char x[2];x[1] = 10;
+    return x[1];
+}
+
+char case_char_array_2_x[2];
+int case_char_array_2() {
+    case_char_array_2_x[0] = -12;
+    case_char_array_2_x[1] = 14;
+    int y;y = 5;
+    return case_char_array_2_x[0] + case_char_array_2_x[1] + y;
+}
+int case_str_1() {
+    char *x = "I'm abc\n";
+    printf(x);
+    return 10;
+}
+
 int main() { 
     test("stmt_1", 52, case1());
     test("stmt_2", 1, case2());
@@ -343,5 +361,10 @@ int main() {
     test("gvar_2", 14, case_gvar_2());
     test("gvar_3", 13, case_gvar_3());
     test("gvar_4", 31, case_gvar_4());
+
+    test("char_array_1", 10, case_char_array_1());
+    test("char_array_2", 7, case_char_array_2());
+
+    test("case_str_1", 10, case_str_1());
     return 0;
 }

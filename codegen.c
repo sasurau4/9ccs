@@ -237,7 +237,12 @@ void gen(Node *node) {
         case ND_DEREF: {
             gen(node->lhs);
             printf("    pop rax\n");
-            printf("    mov rax, [rax]\n");
+            if (node->lhs->type->ty == ARRAY && node->lhs->type->ptr_to->ty == CHAR) {
+                printf("    movzx eax, BYTE PTR [rax]\n");
+                printf("    movsx eax, al\n");
+            } else {
+                printf("    mov rax, [rax]\n");
+            }
             printf("    push rax\n");
             return;
         }
@@ -248,7 +253,6 @@ void gen(Node *node) {
             return;
         }
         case ND_STR: {
-            printf("    # This is string!\n");
             printf("    lea rax, [rip+.LC%d]\n", node->str_index);
             printf("    push rax\n");
             return;
