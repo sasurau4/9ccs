@@ -8,8 +8,10 @@ OBJS=$(SRCS:.c=.o)
 
 $(OBJS): 9ccs.h
 
-test: 9ccs
-		./test.sh
+test: 9ccs test/test_cases.c
+	@./9ccs test/test_cases.c > tmp.s
+	@gcc -o tmp tmp.s test_func.o
+	@./tmp
 
 debug: 9ccs
 		./debug.sh
